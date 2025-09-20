@@ -32,6 +32,7 @@ const translations = {
     // Playlist
     lofi: 'Lo-fi',
     classical: 'Classical',
+    catholic: 'Catholic',
     
     // Footer
     disclaimer: 'Inspired by the Pomodoro® Technique (registered trademark of Francesco Cirillo). This site is not affiliated.',
@@ -60,6 +61,7 @@ const translations = {
     // Playlist
     lofi: 'Lo-fi',
     classical: 'Clássica',
+    catholic: 'Católica',
     
     // Footer
     disclaimer: 'Inspirado na Técnica Pomodoro® (marca registrada de Francesco Cirillo). Este site não é afiliado.',

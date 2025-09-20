@@ -11,11 +11,15 @@ import { AdPlaceholder } from "@/components/AdPlaceholder";
 import { Footer } from "@/components/Footer";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { TimerProvider } from "@/context/TimerContext";
+import YouTubeConsentPlayer from "@/components/YoutubeConsentPlayer";
+import { ConfigProvider } from "@/context/ConfigContext";
+import { Analytics } from "@vercel/analytics/next"
 
 export default function Home() {
   return (
     <ThemeProvider>
       <LanguageProvider>
+        <ConfigProvider>
         <TimerProvider>
           <div className="min-h-screen bg-background transition-colors duration-300">
             <div className="container mx-auto px-6 py-12">
@@ -63,7 +67,7 @@ export default function Home() {
 
                 {/* YouTube Player */}
                 <div className="mb-8">
-                  <YouTubePlayer />
+                  <YouTubeConsentPlayer />
                 </div>
 
                 {/* Ad Placeholder */}
@@ -74,7 +78,9 @@ export default function Home() {
             <Footer />
           </div>
         </TimerProvider>
+        </ConfigProvider>
       </LanguageProvider>
+      <Analytics />
     </ThemeProvider>
   );
 }

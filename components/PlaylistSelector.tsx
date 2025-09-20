@@ -4,40 +4,37 @@ import { useState } from 'react';
 import { useLanguage } from "@/context/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Music } from "lucide-react";
+import { useConfig } from '@/context/ConfigContext';
+
+type ButtonType = {
+  id: PlaylistType;
+  labelKey: string;
+};
+
+const buttons: ButtonType[] = [
+  { id: 'lofi', labelKey: 'lofi' },
+  { id: 'classical', labelKey: 'classical' },
+  { id: 'catholic', labelKey: 'catholic' },
+];
 
 export function PlaylistSelector() {
-  const [selectedPlaylist, setSelectedPlaylist] = useState<'lofi' | 'classical' | null>('lofi');
   const { t } = useLanguage();
+  const { setActivePlaylist, activePlaylist } = useConfig()
 
   return (
     <div className="flex gap-3 items-center">
       <Music className="w-4 h-4 text-muted-foreground mr-3" />
-      
-      <Button
-        onClick={() => setSelectedPlaylist(selectedPlaylist === 'lofi' ? null : 'lofi')}
-        variant={selectedPlaylist === 'lofi' ? 'default' : 'secondary'}
-        size="sm"
-        className={`rounded-lg px-4 py-2 text-sm font-medium transition-all focus-ring ${
-          selectedPlaylist === 'lofi'
-            ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-            : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-        }`}
+
+      {
+      buttons.map((button) => (
+        <Button
+          key={button.id}
+          onClick={() => setActivePlaylist(button.id === activePlaylist ? null : button.id)}
+          variant={activePlaylist === button.id ? 'default' : 'secondary'}
       >
-        {t('lofi')}
-      </Button>
-      
-      <Button
-        onClick={() => setSelectedPlaylist(selectedPlaylist === 'classical' ? null : 'classical')}
-        variant={selectedPlaylist === 'classical' ? 'default' : 'secondary'}
-        size="sm"
-        className={`rounded-lg px-4 py-2 text-sm font-medium transition-all focus-ring ${
-          selectedPlaylist === 'classical'
-            ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-            : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-        }`}
-      >
-        {t('classical')}
-      </Button>
+        {t(button.id)}
+        </Button>))
+      }
     </div>
   );
 }

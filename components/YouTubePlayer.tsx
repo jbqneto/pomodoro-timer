@@ -7,8 +7,9 @@ export function YouTubePlayer() {
   
   // YouTube playlist IDs for lo-fi and classical music
   const playlists = {
-    lofi: 'PLOHoVaTp8R7eQ0KbK2nvClIQHhz6Kjq6M', // Lo-fi study playlist
-    classical: 'PLcGrPBXgGlCF3d3nP_s6JNDUj2RiVpnLD' // Classical study playlist
+    lofi: 'PLgRDBI6ZEX_yqpTYSAgshj_vjoaMs0GP8', // Lo-fi study playlist
+    classical: 'PLgRDBI6ZEX_ztab0cICj_wIqo1GHjtzDd', // Classical study playlist
+    catholic: 'PLgRDBI6ZEX_zsw_JKMy_lEyXvvNENoEyr' // Catholic hymns playlist
   };
 
   return (
