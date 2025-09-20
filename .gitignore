@@ -1,0 +1,61 @@
+# Dependências
+node_modules/
+.pnpm-store/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Next.js build & cache
+.next/
+out/
+.build/
+dist/
+
+# Vercel / Deployment
+.vercel/
+.vercel_build_output/
+
+# TypeScript
+*.tsbuildinfo
+.next/cache/
+
+# Arquivos de ambiente (chave secreta, variáveis)
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Editor/IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Yarn / NPM / pnpm
+package-lock.json
+yarn.lock
+.pnpm-debug.log
+# se for usar lockfile, mantenha-o e ignore outros que não usar
+
+# Bundlers / ferramentas de transpiler
+/.tmp/
+/build/
+/cache/
+
+/public/static/chunks/ # opcional, se Next.js gerar chunks estáticos
+
+# Outros
+coverage/
+*.tgz
+*.bak
