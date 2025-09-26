@@ -1,9 +1,16 @@
 "use client";
 
-import { createContext, useContext, useState, useRef, ReactNode, useCallback } from 'react';
+import { min, set } from 'date-fns';
+import { createContext, useContext, useState, useRef, ReactNode, useCallback, useEffect } from 'react';
 
 type TimerState = 'idle' | 'running' | 'paused';
 type Phase = 'focus' | 'break';
+
+type PresetSettings = {
+  focus: number;
+  break: number;
+  longBreak: number;
+}
 
 interface TimerContextType {
   minutes: number;
@@ -20,27 +27,31 @@ interface TimerContextType {
   setPreset: (preset: '25/5' | '15') => void;
 }
 
+const DEFAULT_PRESET: PresetSettings = { focus: 3, break: 1, longBreak: 2 };
+
 const TimerContext = createContext<TimerContextType | undefined>(undefined);
 
 export function TimerProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<TimerState>('idle');
   const [phase, setPhase] = useState<Phase>('focus');
-  const [session, setSession] = useState(1);
+  const [session, setSession] = useState(0); //initial session count
   const [preset, setPresetState] = useState<'25/5' | '15'>('25/5');
-  
-  const [minutes, setMinutes] = useState(25);
-  const [seconds, setSeconds] = useState(0);
-  
+  const [seconds, setSeconds] = useState(DEFAULT_PRESET.focus * 60);
+  const alarmRef = useRef<HTMLAudioElement | null>(null);
+
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const presetMap = new Map<string, PresetSettings>();
+  presetMap.set('25/5', DEFAULT_PRESET);
+  presetMap.set('15', { focus: 15, break: 2, longBreak: 5 });
 
   const getInitialTime = useCallback((currentPhase: Phase, currentPreset: '25/5' | '15') => {
-    if (currentPreset === '15') {
-      return { minutes: 15, seconds: 0 };
+    let presetSettings = presetMap.get(currentPreset) ?? DEFAULT_PRESET;
+
+    return {
+      minutes: currentPhase === 'focus' ? presetSettings.focus : presetSettings.break,
+      seconds: 0
     }
-    
-    return currentPhase === 'focus' 
-      ? { minutes: 25, seconds: 0 }
-      : { minutes: 5, seconds: 0 };
+
   }, []);
 
   const setPreset = useCallback((newPreset: '25/5' | '15') => {
@@ -48,49 +59,32 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     
     if (state === 'idle') {
       const { minutes: newMinutes, seconds: newSeconds } = getInitialTime('focus', newPreset);
-      setMinutes(newMinutes);
-      setSeconds(newSeconds);
+      setSeconds(newMinutes * 60 + newSeconds);
       setPhase('focus');
     }
   }, [state, getInitialTime]);
 
   const startTimer = useCallback(() => {
+    setSession((prev) => {
+      if (phase === 'focus') {
+        return prev + 1;
+      }
+
+      return prev;
+    });
     setState('running');
-    
+
     intervalRef.current = setInterval(() => {
-      setSeconds(prev => {
-        if (prev > 0) {
-          return prev - 1;
+      setSeconds((prevSeconds) => {
+        if (prevSeconds > 0) {
+          return prevSeconds - 1;
         } else {
-          setMinutes(prevMin => {
-            if (prevMin > 0) {
-              return prevMin - 1;
-            } else {
-              // Timer completed
-              setState('idle');
-              
-              if (phase === 'focus') {
-                // Switch to break
-                setPhase('break');
-                const breakTime = preset === '25/5' ? 5 : 15; // For 15min preset, use 15min break too
-                setMinutes(breakTime);
-                setSeconds(0);
-              } else {
-                // Switch to focus
-                setPhase('focus');
-                setSession(prev => prev + 1);
-                const { minutes: focusMinutes } = getInitialTime('focus', preset);
-                setMinutes(focusMinutes);
-                setSeconds(0);
-              }
-              
-              return 0;
-            }
-          });
-          return 59;
+          return 0;
         }
-      });
+    });
+      
     }, 1000);
+
   }, [phase, preset, getInitialTime]);
 
   const pauseTimer = useCallback(() => {
@@ -114,14 +108,48 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     }
     
     const { minutes: resetMinutes, seconds: resetSeconds } = getInitialTime('focus', preset);
-    setMinutes(resetMinutes);
-    setSeconds(resetSeconds);
+    setSeconds(resetMinutes * 60 + resetSeconds);
   }, [preset, getInitialTime]);
+
+  useEffect(() => {
+    console.log(`UseEffect > ${seconds} (${phase})`);
+
+    if (seconds === 0) {
+      setState('idle');
+
+      if (alarmRef.current) {
+        alarmRef.current.play().catch((error) => {
+          console.error("Error playing alarm sound:", error);
+        });
+      }
+
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+
+      if (phase === 'focus') {
+        setPhase('break');
+        const { minutes: breakMinutes, seconds: breakSeconds } = getInitialTime('break', preset);
+        setSeconds(breakMinutes * 60);
+      } else {
+        setPhase('focus');
+        const { minutes: focusMinutes, seconds: focusSeconds } = getInitialTime('focus', preset);
+        setSeconds(focusMinutes * 60 + focusSeconds);
+      }
+
+    } 
+
+  }, [seconds])
+
+  // load data from
+  useEffect(() => {
+
+  }, []);
 
   return (
     <TimerContext.Provider value={{
-      minutes,
-      seconds,
+      minutes: Math.floor(seconds / 60),
+      seconds: seconds % 60,
       state,
       phase,
       session,
@@ -133,6 +161,14 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       setPreset
     }}>
       {children}
+
+      <audio
+        ref={alarmRef}
+        src="/sounds/alarm-clock.mp3"
+        preload="auto"
+        playsInline
+        className="hidden"
+      />
     </TimerContext.Provider>
   );
 }

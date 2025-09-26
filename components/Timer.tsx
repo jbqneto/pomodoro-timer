@@ -2,6 +2,7 @@
 
 import { useTimer } from "@/context/TimerContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { useEffect, useRef } from "react";
 
 export function Timer() {
   const { minutes, seconds, phase, session } = useTimer();
@@ -14,6 +15,22 @@ export function Timer() {
   const getPhaseMessage = () => {
     return phase === 'focus' ? t('timeToFocus') : t('timeForBreak');
   };
+  
+  const onVisibilityChange = () => {
+      setTimeout(() => {
+        console.log('Visibility changed to:' + document.visibilityState);
+      }, 500);
+      
+      if (document.visibilityState === 'visible') {
+        
+      }
+  }
+
+  useEffect(() => {
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+  }, []);
 
   return (
     <div className="text-center">
@@ -41,6 +58,7 @@ export function Timer() {
           {getPhaseMessage()}
         </div>
       </div>
+      
     </div>
   );
 }
