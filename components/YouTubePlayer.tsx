@@ -11,6 +11,21 @@ export function YouTubePlayer() {
   const playerRef = useRef<any>(null);
   const [apiReady, setApiReady] = useState(false);
 
+  const playVideo = () => {
+    if (!playerRef.current) return;
+    try { playerRef.current.playVideo(); } catch {}
+  }
+
+  const pauseVideo = () => {
+    if (!playerRef.current) return;
+    try { playerRef.current.pauseVideo(); } catch {}
+  }
+
+  const stopVideo = () => {
+    if (!playerRef.current) return;
+    try { playerRef.current.stopVideo(); } catch {}
+  }
+
   useEffect(() => {
     const init = () => {
       // @ts-ignore
@@ -55,6 +70,10 @@ export function YouTubePlayer() {
       },
       events: {
         onReady: () => {
+          if (state === 'running') {
+            playVideo();
+          }
+
           try { playerRef.current.setVolume(80); } catch {}
         },
       },
@@ -67,13 +86,17 @@ export function YouTubePlayer() {
   }, [apiReady, activePlaylist]);
 
   useEffect(() => {
+    if (!playerRef.current) return;
+
     if (state === 'running') {
-      try { playerRef.current?.playVideo?.(); } catch {}
-    } else if (state === 'paused') {
-      try { playerRef.current?.pauseVideo?.(); } catch {}
+      playVideo();
+    } else if (state === 'paused' || state === 'idle') {
+      pauseVideo()
     }
 
   }, [state, preset]);
+
+  if (!apiReady) return <></>
 
   return (
     <div className="w-full max-w-2xl aspect-video overflow-hidden rounded-xl">

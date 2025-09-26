@@ -1,6 +1,5 @@
 "use client";
 
-import { min, set } from 'date-fns';
 import { createContext, useContext, useState, useRef, ReactNode, useCallback, useEffect } from 'react';
 
 type TimerState = 'idle' | 'running' | 'paused';
@@ -27,7 +26,13 @@ interface TimerContextType {
   setPreset: (preset: '25/5' | '15') => void;
 }
 
-const DEFAULT_PRESET: PresetSettings = { focus: 3, break: 1, longBreak: 2 };
+const ENV_PRESET_25 = (process.env.NEXT_PUBLIC_PRESET_25 || '25,5,15').split(',');
+
+const DEFAULT_PRESET: PresetSettings = { 
+  focus: parseInt(ENV_PRESET_25[0]), 
+  break: parseInt(ENV_PRESET_25[1]), 
+  longBreak: parseInt(ENV_PRESET_25[2]) 
+};
 
 const TimerContext = createContext<TimerContextType | undefined>(undefined);
 
