@@ -28,20 +28,30 @@ export default function YouTubeConsentPlayer() {
   return (
     <div className="w-full max-w-2xl">
       {!consented ? (
-        <div className="rounded-xl border p-4 text-sm">
-          This embedded playlist is hosted on YouTube. To play it, please grant media/ads consent.
-          <div className="mt-3 flex gap-2">
-            <button
-              className="btn"
-              onClick={() => { localStorage.setItem("consent_ads_media","granted"); setConsented(true); }}
-            >
-              Grant consent & play
-            </button>
-            <button className="btn-outline" onClick={() => alert("You can use the timer without media.")}>
-              Continue without media
-            </button>
-          </div>
-        </div>
+        <div className="rounded-xl border p-4 text-sm bg-neutral-900 text-neutral-100">
+    <p className="mb-3">
+      This embedded playlist is hosted on YouTube. To play it, please grant media/ads consent.
+    </p>
+
+    <div className="flex flex-col items-start gap-2">
+      <button
+        className="btn w-full sm:w-auto btn-primary"
+        onClick={() => {
+          localStorage.setItem("consent_ads_media", "granted");
+          setConsented(true);
+        }}
+      >
+        Grant consent & play
+      </button>
+
+      <button
+        className="btn-outline w-full sm:w-auto text-sm"
+        onClick={() => localStorage.setItem("consent_ads_media", "denied")}
+      >
+        Continue without media
+      </button>
+    </div>
+  </div>
       ) : readyToLoad && (
         <div
           className="aspect-video w-full overflow-hidden rounded-xl bg-neutral-200 dark:bg-neutral-800"
