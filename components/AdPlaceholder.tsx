@@ -2,8 +2,12 @@
 
 import { useLanguage } from "@/context/LanguageContext";
 
+const AD_TOGGLE = process.env.NEXT_PUBLIC_TOGGLE_ADS === 'true';
+
 export function AdPlaceholder() {
   const { t } = useLanguage();
+
+  if (!AD_TOGGLE) return <></>
   
   return (
     <div className="bg-card rounded-2xl p-8 shadow-sm border border-border text-center">

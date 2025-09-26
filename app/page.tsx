@@ -37,8 +37,10 @@ export default function Home() {
                   <ThemeToggle />
                 </div>
 
+                <AdPlaceholder />
+
                 {/* Main Timer Card */}
-                <div className="bg-card rounded-2xl p-12 mb-8 shadow-sm border border-border">
+                <div className="bg-card mt-8 rounded-2xl p-12 mb-8 shadow-sm border border-border">
                   <Timer />
                   
                   <div className="mt-12">
@@ -67,7 +69,7 @@ export default function Home() {
 
                 {/* YouTube Player */}
                 <div className="mb-8">
-                  <YouTubeConsentPlayer />
+                  <YouTubePlayer />
                 </div>
 
                 {/* Ad Placeholder */}
