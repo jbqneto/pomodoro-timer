@@ -12,9 +12,9 @@ type ButtonType = {
 };
 
 const buttons: ButtonType[] = [
+  { id: 'catholic', labelKey: 'catholic' },
   { id: 'lofi', labelKey: 'lofi' },
   { id: 'classical', labelKey: 'classical' },
-  { id: 'catholic', labelKey: 'catholic' },
 ];
 
 export function PlaylistSelector() {

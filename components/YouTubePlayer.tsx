@@ -4,7 +4,12 @@ import { useConfig } from '@/context/ConfigContext';
 import { useTimer } from '@/context/TimerContext';
 import { useEffect, useRef, useState } from 'react';
 
-export function YouTubePlayer() {
+type PlayerProperties = {
+  width?: number;
+  height?: number;
+}
+
+export function YouTubePlayer({ width = 640, height = 360 }: PlayerProperties) {
   const { activePlaylist, getPlaylistId } = useConfig();
   const {state, preset} = useTimer();
   const containerId = useRef(`yt-${Math.random().toString(36).slice(2)}`);
@@ -55,8 +60,8 @@ export function YouTubePlayer() {
     playerRef.current = new YT.Player(containerId.current, {
       // use host "nocookie" para privacy-enhanced mode
       host: "https://www.youtube.com",
-      height: "360",
-      width: "640",
+      height: '' + height,
+      width: '' + width,
       playerVars: {
         listType: "playlist",
         list: playlistId,
@@ -99,7 +104,7 @@ export function YouTubePlayer() {
   if (!apiReady) return <></>
 
   return (
-    <div className="w-full max-w-2xl aspect-video overflow-hidden rounded-xl">
+    <div className="w-full aspect-video overflow-hidden rounded-xl">
       <div id={containerId.current} className="w-full h-full" />
     </div>
   );
