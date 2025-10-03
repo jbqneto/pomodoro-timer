@@ -117,8 +117,6 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   }, [preset, getInitialTime]);
 
   useEffect(() => {
-    console.log(`UseEffect > ${seconds} (${phase})`);
-
     if (seconds === 0) {
       setState('idle');
 

@@ -2,19 +2,28 @@
 
 import { useConfig } from '@/context/ConfigContext';
 import { useTimer } from '@/context/TimerContext';
-import { useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 type PlayerProperties = {
   width?: number;
   height?: number;
 }
 
-export function YouTubePlayer({ width = 640, height = 360 }: PlayerProperties) {
+export interface YoutubePlayerRef {
+  playVideo: () => void;
+  pauseVideo: () => void;
+  stopVideo: () => void;
+  setVolume: (volume: number) => void;
+}
+
+const YouTubePlayer = forwardRef<YoutubePlayerRef, PlayerProperties>(({ width = 640, height = 360 }, ref) => {
+    
   const { activePlaylist, getPlaylistId } = useConfig();
   const {state, preset} = useTimer();
   const containerId = useRef(`yt-${Math.random().toString(36).slice(2)}`);
   const playerRef = useRef<any>(null);
   const [apiReady, setApiReady] = useState(false);
+
 
   const playVideo = () => {
     if (!playerRef.current) return;
@@ -30,6 +39,26 @@ export function YouTubePlayer({ width = 640, height = 360 }: PlayerProperties) {
     if (!playerRef.current) return;
     try { playerRef.current.stopVideo(); } catch {}
   }
+
+  const setVolume = (volume: number) => {
+    if (!playerRef.current) return;
+    try { playerRef.current.setVolume(volume); } catch {}
+  }
+
+  useImperativeHandle(ref, () => ({
+    playVideo: () => {
+      playVideo();
+    },
+    pauseVideo: () => {
+      pauseVideo();
+    },
+    stopVideo: () => {
+      stopVideo();
+    },
+    setVolume: (volume: number) => {
+      setVolume(volume);
+    }
+  }));
 
   useEffect(() => {
     const init = () => {
@@ -108,4 +137,6 @@ export function YouTubePlayer({ width = 640, height = 360 }: PlayerProperties) {
       <div id={containerId.current} className="w-full h-full" />
     </div>
   );
-}
+});
+
+export default YouTubePlayer;
