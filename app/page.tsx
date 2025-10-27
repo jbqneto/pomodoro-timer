@@ -1,13 +1,6 @@
 "use client";
 
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { Timer } from "@/components/Timer";
-import { Controls } from "@/components/timer/Controls";
-import { PresetSelector } from "@/components/PresetSelector";
-import { PlaylistSelector } from "@/components/PlaylistSelector";
-import { YouTubePlayer } from "@/components/YouTubePlayer";
-import { AdPlaceholder } from "@/components/AdPlaceholder";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { TimerProvider } from "@/context/TimerContext";
 import { ConfigProvider } from "@/context/ConfigContext";

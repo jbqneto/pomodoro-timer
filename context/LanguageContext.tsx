@@ -33,10 +33,16 @@ const translations = {
     lofi: 'Lo-fi',
     classical: 'Classical',
     catholic: 'Gregorian Chants',
+    playerCollapse: 'Collapse player',
+    playerExpand: 'Expand player',
     
     // Footer
     disclaimer: 'Inspired by the Pomodoro® Technique (registered trademark of Francesco Cirillo). This site is not affiliated.',
     
+    // Header
+    about: 'About',
+    contact: 'Contact',
+
     // Ad
     adPlaceholder: 'Advertisement Space'
   },
@@ -62,10 +68,16 @@ const translations = {
     lofi: 'Lo-fi',
     classical: 'Clássica',
     catholic: 'Cantos Gregorianos',
+    playerCollapse: 'Recolher player',
+    playerExpand: 'Expandir player',
     
     // Footer
     disclaimer: 'Inspirado na Técnica Pomodoro® (marca registrada de Francesco Cirillo). Este site não é afiliado.',
     
+    // Header
+    about: 'Sobre',
+    contact: 'Contato',
+
     // Ad
     adPlaceholder: 'Espaço Publicitário'
   }

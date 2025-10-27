@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import { useLanguage } from "@/context/LanguageContext";
 import { useState } from "react";
@@ -6,7 +6,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import SettingsDialog from "./settings/SettingsDialog";
 
 export default function Header() {
-  const { language, setLanguage } = useLanguage();
+  const { t,language, setLanguage } = useLanguage();
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -21,8 +21,8 @@ export default function Header() {
         {/* Desktop nav */}
         <nav className="hidden items-center gap-4 md:flex">
           <a className="text-sm text-neutral-300 hover:text-white" href="#!">Home</a>
-          <a className="text-sm text-neutral-300 hover:text-white" href="#!">Sobre</a>
-          <a className="text-sm text-neutral-300 hover:text-white" href="#!">Contato</a>
+          <a className="text-sm text-neutral-300 hover:text-white" href="#">{ t('about') }</a>
+          <a className="text-sm text-neutral-300 hover:text-white" href="#!">{ t('contact') }</a>
 
           {/* Lang switch */}
           <div className="ml-2 inline-flex overflow-hidden rounded-full border border-white/10">

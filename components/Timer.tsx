@@ -18,7 +18,7 @@ export function Timer() {
   
   const onVisibilityChange = () => {
       setTimeout(() => {
-        console.log('Visibility changed to:' + document.visibilityState);
+        console.log(`Visibility changed to:${ document.visibilityState} (${new Date().toLocaleTimeString()})`);
       }, 500);
       
       if (document.visibilityState === 'visible') {

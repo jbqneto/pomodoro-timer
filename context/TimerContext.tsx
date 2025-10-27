@@ -70,8 +70,14 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   }, [state, getInitialTime]);
 
   const startTimer = useCallback(() => {
+    const { minutes: focusMinutes } = getInitialTime('focus', preset);
+    const focusSeconds = focusMinutes * 60;
+
     setSession((prev) => {
-      if (phase === 'focus') {
+      console.log(`Phase: ${phase}, Seconds: ${seconds}`);
+      if (state === 'idle') return 1;
+
+      if (phase === 'focus' && seconds === focusMinutes * 60) {
         return prev + 1;
       }
 

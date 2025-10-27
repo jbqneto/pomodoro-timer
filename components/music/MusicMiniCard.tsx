@@ -3,8 +3,10 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { Card } from "../ui/card";
 import YouTubePlayer, { YoutubePlayerRef } from "../YouTubePlayer";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function MusicMiniCard() {
+  const { t } = useLanguage();
   const playerRef = useRef<YoutubePlayerRef>(null);
   const [expanded, setExpanded] = useState(false);
   const [volume, setVolume] = useState(80);
@@ -50,7 +52,6 @@ export default function MusicMiniCard() {
       {/** TODO: Later
       <button onClick={handlePlayToggle} className="btn-primary">▶ Play</button>
        */}
-      <button onClick={() => {setVolume(0)}} className="chip">🔈 Mute</button>
       <div className="ml-2 flex items-center gap-2">
         <span className="text-xs text-neutral-400">Vol</span>
         <input value={volume} onChange={handleVolumeChange} type="range" min={0} max={100}
@@ -66,7 +67,7 @@ export default function MusicMiniCard() {
       onClick={() => setExpanded((s) => !s)}
       aria-expanded={expanded}
     >
-      {expanded ? "Collapse player" : "Expand player"}
+      {expanded ? t("playerCollapse") : t("playerExpand")}
     </button>
   </div>
 </div>

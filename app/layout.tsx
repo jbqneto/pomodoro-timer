@@ -13,6 +13,7 @@ export const metadata: Metadata = {
   robots: 'index, follow',
   openGraph: {
     title: 'Pomodoro Timer | Focus Technique',
+    siteName: "Focus Timer",
     description: 'A bilingual Pomodoro timer with YouTube playlists for better focus.',
     type: 'website',
     locale: 'en_US',
