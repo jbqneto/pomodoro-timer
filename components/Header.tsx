@@ -4,6 +4,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useState } from "react";
 import { ThemeToggle } from "./ThemeToggle";
 import SettingsDialog from "./settings/SettingsDialog";
+import Link from "next/link";
 
 export default function Header() {
   const { t,language, setLanguage } = useLanguage();
@@ -20,9 +21,9 @@ export default function Header() {
 
         {/* Desktop nav */}
         <nav className="hidden items-center gap-4 md:flex">
-          <a className="text-sm text-neutral-300 hover:text-white" href="#!">Home</a>
-          <a className="text-sm text-neutral-300 hover:text-white" href="#">{ t('about') }</a>
-          <a className="text-sm text-neutral-300 hover:text-white" href="#!">{ t('contact') }</a>
+          <Link className="text-sm text-neutral-300 hover:text-white" href="/">{t('home')}</Link>
+          <Link className="text-sm text-neutral-300 hover:text-white" href="/about">{ t('about') }</Link>
+          <a className="text-sm text-neutral-300 hover:text-white" href="#android-app">{t('androidApp')}</a>
 
           {/* Lang switch */}
           <div className="ml-2 inline-flex overflow-hidden rounded-full border border-white/10">
@@ -47,7 +48,7 @@ export default function Header() {
           {/* Settings gear */}
           <button
             className="rounded-full p-2 text-neutral-400 hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-500/30"
-            aria-label="Abrir configurações"
+            aria-label={t('settings')}
             onClick={() => setOpen(true)}
           >
             ⚙
@@ -68,12 +69,12 @@ export default function Header() {
       {menuOpen && (
         <div className="border-t border-white/10 md:hidden">
           <div className="mx-auto flex max-w-5xl flex-col gap-2 px-4 py-3">
-            <a className="text-sm text-neutral-200" href="#!" onClick={()=>setMenuOpen(false)}>Home</a>
-            <a className="text-sm text-neutral-200" href="#!" onClick={()=>setMenuOpen(false)}>Sobre</a>
-            <a className="text-sm text-neutral-200" href="#!" onClick={()=>setMenuOpen(false)}>Contato</a>
+            <Link className="text-sm text-neutral-200" href="/" onClick={()=>setMenuOpen(false)}>{t('home')}</Link>
+            <Link className="text-sm text-neutral-200" href="/about" onClick={()=>setMenuOpen(false)}>{t('about')}</Link>
+            <a className="text-sm text-neutral-200" href="#android-app" onClick={()=>setMenuOpen(false)}>{t('androidApp')}</a>
 
             <div className="flex items-center gap-2">
-              <span className="text-sm text-neutral-400">Idioma</span>
+              <span className="text-sm text-neutral-400">{t('language')}</span>
               <div className="inline-flex overflow-hidden rounded-full border border-white/10">
                 <button className={`px-3 py-1 text-sm ${language==="en"?"bg-sky-500 text-white":"text-neutral-200"}`} onClick={()=>setLanguage("en")}>EN</button>
                 <button className={`px-3 py-1 text-sm ${language==="pt"?"bg-sky-500 text-white":"text-neutral-200"}`} onClick={()=>setLanguage("pt")}>PT</button>
@@ -82,7 +83,7 @@ export default function Header() {
 
             <div className="flex items-center justify-between">
               <ThemeToggle />
-              <button className="rounded-full p-2 text-neutral-400 hover:bg-white/5" onClick={()=>setOpen(true)}>⚙</button>
+              <button className="rounded-full p-2 text-neutral-400 hover:bg-white/5" aria-label={t('settings')} onClick={()=>setOpen(true)}>⚙</button>
             </div>
           </div>
         </div>

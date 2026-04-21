@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useRef, ReactNode, useCallback, useEffect } from 'react';
+import { useConfig } from './ConfigContext';
 
 type TimerState = 'idle' | 'running' | 'paused';
 type Phase = 'focus' | 'break';
@@ -37,9 +38,10 @@ const DEFAULT_PRESET: PresetSettings = {
 const TimerContext = createContext<TimerContextType | undefined>(undefined);
 
 export function TimerProvider({ children }: { children: ReactNode }) {
+  const { soundEnabled, soundVolume } = useConfig();
   const [state, setState] = useState<TimerState>('idle');
   const [phase, setPhase] = useState<Phase>('focus');
-  const [session, setSession] = useState(0); //initial session count
+  const [session, setSession] = useState(1);
   const [preset, setPresetState] = useState<'25/5' | '15'>('25/5');
   const [seconds, setSeconds] = useState(DEFAULT_PRESET.focus * 60);
   const alarmRef = useRef<HTMLAudioElement | null>(null);
@@ -70,19 +72,10 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   }, [state, getInitialTime]);
 
   const startTimer = useCallback(() => {
-    const { minutes: focusMinutes } = getInitialTime('focus', preset);
-    const focusSeconds = focusMinutes * 60;
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
 
-    setSession((prev) => {
-      console.log(`Phase: ${phase}, Seconds: ${seconds}`);
-      if (state === 'idle') return 1;
-
-      if (phase === 'focus' && seconds === focusMinutes * 60) {
-        return prev + 1;
-      }
-
-      return prev;
-    });
     setState('running');
 
     intervalRef.current = setInterval(() => {
@@ -96,7 +89,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       
     }, 1000);
 
-  }, [phase, preset, getInitialTime]);
+  }, []);
 
   const pauseTimer = useCallback(() => {
     setState('paused');
@@ -123,10 +116,17 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   }, [preset, getInitialTime]);
 
   useEffect(() => {
+    if (alarmRef.current) {
+      alarmRef.current.volume = soundEnabled ? soundVolume / 100 : 0;
+      alarmRef.current.muted = !soundEnabled;
+    }
+  }, [soundEnabled, soundVolume]);
+
+  useEffect(() => {
     if (seconds === 0) {
       setState('idle');
 
-      if (alarmRef.current) {
+      if (soundEnabled && alarmRef.current) {
         alarmRef.current.play().catch((error) => {
           console.error("Error playing alarm sound:", error);
         });
@@ -138,21 +138,25 @@ export function TimerProvider({ children }: { children: ReactNode }) {
 
       if (phase === 'focus') {
         setPhase('break');
-        const { minutes: breakMinutes, seconds: breakSeconds } = getInitialTime('break', preset);
+        const presetSettings = presetMap.get(preset) ?? DEFAULT_PRESET;
+        const breakMinutes = session % 4 === 0 ? presetSettings.longBreak : presetSettings.break;
         setSeconds(breakMinutes * 60);
       } else {
         setPhase('focus');
+        setSession((prev) => prev + 1);
         const { minutes: focusMinutes, seconds: focusSeconds } = getInitialTime('focus', preset);
         setSeconds(focusMinutes * 60 + focusSeconds);
       }
 
     } 
+  }, [seconds, phase, preset, getInitialTime, session, soundEnabled]);
 
-  }, [seconds])
-
-  // load data from
   useEffect(() => {
-
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
   }, []);
 
   return (

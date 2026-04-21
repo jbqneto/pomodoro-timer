@@ -7,6 +7,7 @@ import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 're
 type PlayerProperties = {
   width?: number;
   height?: number;
+  onPlaybackStateChange?: (isPlaying: boolean) => void;
 }
 
 export interface YoutubePlayerRef {
@@ -16,10 +17,10 @@ export interface YoutubePlayerRef {
   setVolume: (volume: number) => void;
 }
 
-const YouTubePlayer = forwardRef<YoutubePlayerRef, PlayerProperties>(({ width = 640, height = 360 }, ref) => {
+const YouTubePlayer = forwardRef<YoutubePlayerRef, PlayerProperties>(({ width = 640, height = 360, onPlaybackStateChange }, ref) => {
     
-  const { activePlaylist, getPlaylistId } = useConfig();
-  const {state, preset} = useTimer();
+  const { activePlaylist, autoPlay, soundVolume, getPlaylistId } = useConfig();
+  const { state } = useTimer();
   const containerId = useRef(`yt-${Math.random().toString(36).slice(2)}`);
   const playerRef = useRef<any>(null);
   const [apiReady, setApiReady] = useState(false);
@@ -78,8 +79,10 @@ const YouTubePlayer = forwardRef<YoutubePlayerRef, PlayerProperties>(({ width = 
   }, []);
 
   useEffect(() => {
-    console.log(`Loading YouTube: ${activePlaylist} (${apiReady})`);
-    if (!apiReady || !activePlaylist) return;
+    if (!apiReady || !activePlaylist) {
+      onPlaybackStateChange?.(false);
+      return;
+    }
     // @ts-ignore
     const YT = window.YT;
     const playlistId = getPlaylistId(activePlaylist);
@@ -87,8 +90,7 @@ const YouTubePlayer = forwardRef<YoutubePlayerRef, PlayerProperties>(({ width = 
     if (!playlistId) return;
 
     playerRef.current = new YT.Player(containerId.current, {
-      // use host "nocookie" para privacy-enhanced mode
-      host: "https://www.youtube.com",
+      host: "https://www.youtube-nocookie.com",
       height: '' + height,
       width: '' + width,
       playerVars: {
@@ -104,31 +106,43 @@ const YouTubePlayer = forwardRef<YoutubePlayerRef, PlayerProperties>(({ width = 
       },
       events: {
         onReady: () => {
-          if (state === 'running') {
+          if (state === 'running' && autoPlay) {
             playVideo();
           }
 
-          try { playerRef.current.setVolume(80); } catch {}
+          try { playerRef.current.setVolume(soundVolume); } catch {}
+        },
+        onStateChange: (event: { data: number }) => {
+          // @ts-ignore
+          const YT = window.YT;
+          onPlaybackStateChange?.(event.data === YT.PlayerState.PLAYING);
         },
       },
     });
 
     return () => {
+      onPlaybackStateChange?.(false);
       try { playerRef.current?.destroy?.(); } catch {}
       playerRef.current = null;
     };
-  }, [apiReady, activePlaylist]);
+  }, [apiReady, activePlaylist, onPlaybackStateChange]);
 
   useEffect(() => {
     if (!playerRef.current) return;
 
-    if (state === 'running') {
+    setVolume(soundVolume);
+  }, [soundVolume]);
+
+  useEffect(() => {
+    if (!playerRef.current) return;
+
+    if (state === 'running' && autoPlay) {
       playVideo();
-    } else if (state === 'paused' || state === 'idle') {
+    } else {
       pauseVideo()
     }
 
-  }, [state, preset]);
+  }, [state, autoPlay]);
 
   if (!apiReady) return <></>
 

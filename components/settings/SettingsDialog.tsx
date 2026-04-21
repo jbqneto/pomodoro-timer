@@ -2,10 +2,12 @@
 
 import { useConfig } from "@/context/ConfigContext";
 import { useEffect } from "react";
+import { useLanguage } from "@/context/LanguageContext";
 
 type Props = { open: boolean; onClose: () => void };
 
 export default function SettingsDialog({ open, onClose }: Props) {
+  const { t } = useLanguage();
   const { soundEnabled, setSoundEnabled, soundVolume, setSoundVolume, autoPlay:autoPlayMusic, setAutoPlay:setAutoPlayMusic } = useConfig();
 
   useEffect(() => {
@@ -19,16 +21,16 @@ export default function SettingsDialog({ open, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4">
       <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-neutral-900 p-6 shadow-xl">
-        <h2 className="mb-4 text-lg font-semibold">Configurações</h2>
+        <h2 className="mb-4 text-lg font-semibold">{t('settings')}</h2>
 
         <div className="space-y-5">
           <label className="flex items-center justify-between gap-4">
-            <span>🔔 Alarm</span>
+            <span>🔔 {t('alarm')}</span>
             <input type="checkbox" checked={soundEnabled} onChange={(e) => setSoundEnabled(e.target.checked)} />
           </label>
 
           <div className={`${soundEnabled ? "opacity-100" : "opacity-50 pointer-events-none"}`}>
-            <label className="mb-1 block text-sm text-neutral-300">Volume</label>
+            <label className="mb-1 block text-sm text-neutral-300">{t('volume')}</label>
             <input
               type="range"
               min={0}
@@ -40,13 +42,13 @@ export default function SettingsDialog({ open, onClose }: Props) {
           </div>
 
           <label className="flex items-center justify-between gap-4">
-            <span>🎵 Start music with timer</span>
+            <span>🎵 {t('startMusicWithTimer')}</span>
             <input type="checkbox" checked={autoPlayMusic} onChange={(e) => setAutoPlayMusic(e.target.checked)} />
           </label>
         </div>
 
         <button className="mt-6 w-full rounded-xl bg-sky-500 px-4 py-2 font-semibold text-white hover:bg-sky-400" onClick={onClose}>
-          Close
+          {t('close')}
         </button>
       </div>
     </div>
