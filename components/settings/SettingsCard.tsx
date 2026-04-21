@@ -2,6 +2,7 @@
 
 import { PlaylistSelector } from "../PlaylistSelector";
 import { PresetSelector } from "../PresetSelector";
+import { Music4 } from "lucide-react";
 
 export default function SettingsCard() {
   return (
@@ -17,7 +18,10 @@ export default function SettingsCard() {
         <hr className="border-white/10" />
 
         <section>
-          <h3 className="text-sm font-semibold tracking-wider text-neutral-300">BACKGROUND MUSIC</h3>
+          <div className="flex items-center gap-2 text-neutral-300">
+            <Music4 className="h-4 w-4 text-sky-300" />
+            <h3 className="text-sm font-semibold tracking-wider">BACKGROUND MUSIC</h3>
+          </div>
           <div className="mt-3">
             <PlaylistSelector />
           </div>

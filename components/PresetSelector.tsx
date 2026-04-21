@@ -15,12 +15,12 @@ export function PresetSelector() {
   };
 
   return (
-    <div className="flex gap-3">
+    <div className="grid grid-cols-1 gap-3 sm:flex">
       <Button
         onClick={() => handlePresetChange('25/5')}
         variant={preset === '25/5' ? 'default' : 'secondary'}
         size="sm"
-        className={`rounded-lg px-6 py-2 text-sm font-medium transition-all focus-ring ${
+        className={`w-full justify-center rounded-lg px-6 py-2 text-sm font-medium transition-all focus-ring sm:w-auto ${
           preset === '25/5'
             ? 'bg-primary text-primary-foreground hover:bg-primary/90'
             : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
@@ -34,7 +34,7 @@ export function PresetSelector() {
         onClick={() => handlePresetChange('15')}
         variant={preset === '15' ? 'default' : 'secondary'}
         size="sm"
-        className={`rounded-lg px-6 py-2 text-sm font-medium transition-all focus-ring ${
+        className={`w-full justify-center rounded-lg px-6 py-2 text-sm font-medium transition-all focus-ring sm:w-auto ${
           preset === '15'
             ? 'bg-primary text-primary-foreground hover:bg-primary/90'
             : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'

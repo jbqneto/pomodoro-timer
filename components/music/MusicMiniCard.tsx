@@ -53,19 +53,21 @@ export default function MusicMiniCard() {
           <div className="relative flex flex-col items-center justify-center gap-5 px-5 py-5 sm:px-6">
             <div className="flex w-full items-center justify-between gap-4">
               <div className="flex min-w-0 items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-sky-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-                  <Music4 className="h-5 w-5" />
-                </div>
-
                 <div className="min-w-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-500">
-                    {t("playerLabel")}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-sky-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+                      <Music4 className="h-5 w-5" />
+                    </div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-500">
+                      {t("playerLabel")}
+                    </p>
+                  </div>
                   <p className="truncate text-sm font-medium text-neutral-100">{activePlaylistLabel}</p>
                 </div>
               </div>
 
-              <Tooltip>
+              <div className="hidden sm:block">
+                <Tooltip>
                 <TooltipTrigger asChild>
                   <button
                     type="button"
@@ -80,7 +82,8 @@ export default function MusicMiniCard() {
                 <TooltipContent className="border-white/10 bg-neutral-900 text-neutral-100">
                   {expanded ? t("playerCollapse") : t("playerExpand")}
                 </TooltipContent>
-              </Tooltip>
+                </Tooltip>
+              </div>
             </div>
 
             <div

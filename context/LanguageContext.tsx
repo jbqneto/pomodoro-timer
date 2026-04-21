@@ -59,7 +59,7 @@ const translations = {
 
     // Landing copy
     heroEyebrow: 'Focus faster with music',
-    heroTitle: 'A simple Pomodoro timer with background music.',
+    heroTitle: 'Music and Pomodoro, finally working in your favor.',
     heroDescription: 'Start a focus session in seconds with classical, lo-fi, or Gregorian playlists.',
     androidBadge: 'Want something more complete?',
     androidTitle: 'The full focus experience is coming to Android.',
@@ -128,7 +128,7 @@ const translations = {
 
     // Landing copy
     heroEyebrow: 'Foque mais rápido com música',
-    heroTitle: 'Um timer Pomodoro simples com música de fundo.',
+    heroTitle: 'Música e Pomodoro, finalmente jogando a seu favor.',
     heroDescription: 'Inicie uma sessão de foco em segundos com playlists clássicas, lo-fi ou gregorianas.',
     androidBadge: 'Quer algo mais completo?',
     androidTitle: 'A experiência completa de foco está chegando ao Android.',
