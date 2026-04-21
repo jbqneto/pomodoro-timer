@@ -10,7 +10,7 @@ export default function Footer() {
       <p className="leading-relaxed">
         {t('disclaimer')}
       </p>
-      <p className="mt-2 opacity-70">© 2025 {t('footerCopyright')} - By <a target="_blank" href="http://dev.jbqneto.com/">Queiroz Neto</a></p>
+      <p className="mt-2 opacity-70">© 2025 {t('footerCopyright')} - By <a target="_blank" rel="noopener noreferrer" href="https://dev.jbqneto.com/">Queiroz Neto</a></p>
     </footer>
   );
 }

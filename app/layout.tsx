@@ -5,16 +5,16 @@ import { Inter } from 'next/font/google';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Pomodoro Timer | Focus Technique • Técnica de Foco',
-  description: 'A bilingual Pomodoro timer with YouTube playlists for better focus. Timer Pomodoro bilíngue com playlists do YouTube para melhor foco.',
-  keywords: 'pomodoro, timer, focus, productivity, study, técnica, foco, produtividade, estudos',
-  authors: [{ name: 'Pomodoro Timer App' }],
+  title: 'Focus Beat | Focus Timer With Music',
+  description: 'Focus Beat is a focus and break timer with music for deep work, study sessions, and concentration.',
+  keywords: 'focus timer, focus timer with music, deep work timer, study timer with music, focus sessions, concentration music',
+  authors: [{ name: 'Focus Beat' }],
   viewport: 'width=device-width, initial-scale=1',
   robots: 'index, follow',
   openGraph: {
-    title: 'Pomodoro Timer | Focus Technique',
-    siteName: "Focus Timer",
-    description: 'A bilingual Pomodoro timer with YouTube playlists for better focus.',
+    title: 'Focus Beat | Focus Timer With Music',
+    siteName: "Focus Beat",
+    description: 'A focus and break timer with music for study, deep work, and concentration.',
     type: 'website',
     locale: 'en_US',
   },

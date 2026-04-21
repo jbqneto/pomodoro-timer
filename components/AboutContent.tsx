@@ -13,8 +13,8 @@ export default function AboutContent() {
       </header>
 
       <section className="mb-10">
-        <h2>{t('pomodoroTitle')}</h2>
-        <p>{t('pomodoroDescription')}</p>
+        <h2>{t('focusCycleTitle')}</h2>
+        <p>{t('focusCycleDescription')}</p>
       </section>
 
       <section>

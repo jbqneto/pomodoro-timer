@@ -1,12 +1,12 @@
-# Focus Timer
+# Focus Beat
 
-A simple web‑based Pomodoro style timer with background music and bilingual support (English / Portuguese).
+A simple web-based focus and break timer with background music and bilingual support (English / Portuguese).
 
 ---
 
 ## 🎯 Description
 
-Focus Timer helps users concentrate using the Pomodoro technique. It offers two presets (25/5 and 15 minutes), background music (Lo‑fi or Classical), a clean and responsive interface, and bilingual labels.  
+Focus Beat helps users concentrate with timed focus sessions and background music. It offers two session presets (25/5 and 15 minutes), background music, a clean responsive interface, and bilingual labels.
 
 Demo: [https://pomodoro-timer-eight-swart.vercel.app/](https://pomodoro-timer-eight-swart.vercel.app/)
 
@@ -15,9 +15,9 @@ Demo: [https://pomodoro-timer-eight-swart.vercel.app/](https://pomodoro-timer-ei
 ## 🚀 Features
 
 - Timer presets:
-  - 25 minutes focus followed by 5 minutes break  
-  - 15 minutes shorter focus period  
-- Basic controls: Start, Pause, Resume, Stop  
+  - 25/5 focus cycle
+  - 15-minute short focus session
+- Basic controls: Start, Pause, Resume, Stop
 - Music selection: Lo‑fi or Classical (YouTube embed)  
 - Responsive design for both desktop and mobile  
 - Ads placeholders, ready for AdSense integration in production  

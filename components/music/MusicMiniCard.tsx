@@ -8,12 +8,16 @@ import { useConfig } from "@/context/ConfigContext";
 import { Maximize2, Minimize2, Music4, Pause, Play, Volume2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
+const YOUTUBE_CONSENT_KEY = "youtube-media-consent";
+
 export default function MusicMiniCard() {
   const { t } = useLanguage();
   const { activePlaylist, soundVolume, setSoundVolume } = useConfig();
   const playerRef = useRef<YoutubePlayerRef>(null);
   const [expanded, setExpanded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [consent, setConsent] = useState<"granted" | "denied" | null>(null);
+  const [showConsentModal, setShowConsentModal] = useState(false);
 
   function updateVolume(value: number) {
     if (playerRef.current) {
@@ -29,8 +33,19 @@ export default function MusicMiniCard() {
     updateVolume(soundVolume);
   }, [soundVolume]);
 
+  useEffect(() => {
+    const storedConsent = window.localStorage.getItem(YOUTUBE_CONSENT_KEY);
+
+    if (storedConsent === "granted" || storedConsent === "denied") {
+      setConsent(storedConsent);
+      return;
+    }
+
+    setShowConsentModal(true);
+  }, []);
+
   function togglePlayback() {
-    if (!playerRef.current) return;
+    if (!playerRef.current || consent !== "granted") return;
 
     if (isPlaying) {
       playerRef.current.pauseVideo();
@@ -43,6 +58,16 @@ export default function MusicMiniCard() {
   }
 
   const activePlaylistLabel = activePlaylist ? t(activePlaylist) : t("noPlaylist");
+
+  function updateConsent(nextConsent: "granted" | "denied") {
+    window.localStorage.setItem(YOUTUBE_CONSENT_KEY, nextConsent);
+    setConsent(nextConsent);
+    setShowConsentModal(false);
+
+    if (nextConsent === "denied") {
+      setIsPlaying(false);
+    }
+  }
 
   return (
     <TooltipProvider delayDuration={120}>
@@ -100,7 +125,22 @@ export default function MusicMiniCard() {
                 </div>
 
                 <div className="mx-auto overflow-hidden rounded-2xl border border-white/10 bg-black/35">
-                  <YouTubePlayer ref={playerRef} onPlaybackStateChange={setIsPlaying} />
+                  {consent === "granted" ? (
+                    <YouTubePlayer ref={playerRef} onPlaybackStateChange={setIsPlaying} />
+                  ) : (
+                    <div className="flex aspect-video flex-col items-center justify-center gap-4 px-6 text-center">
+                      <p className="max-w-xs text-sm leading-6 text-neutral-300">
+                        {t("youtubeConsentInline")}
+                      </p>
+                      <button
+                        type="button"
+                        className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition-all duration-200 hover:bg-white/10 focus-ring"
+                        onClick={() => setShowConsentModal(true)}
+                      >
+                        {t("youtubeConsentReview")}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -110,10 +150,11 @@ export default function MusicMiniCard() {
                 <TooltipTrigger asChild>
                   <button
                     type="button"
-                    className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-sky-500 text-white transition-all duration-200 hover:-translate-y-px hover:bg-sky-400 focus-ring"
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-sky-500 text-white transition-all duration-200 hover:-translate-y-px hover:bg-sky-400 focus-ring disabled:cursor-not-allowed disabled:bg-neutral-700 disabled:text-neutral-400 disabled:hover:translate-y-0"
                     onClick={togglePlayback}
                     aria-pressed={isPlaying}
                     aria-label={isPlaying ? t("pauseVideo") : t("playVideo")}
+                    disabled={consent !== "granted"}
                   >
                     {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="ml-0.5 h-4 w-4" />}
                   </button>
@@ -149,6 +190,43 @@ export default function MusicMiniCard() {
           </div>
         </div>
       </Card>
+
+      {showConsentModal && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4">
+          <div className="w-full max-w-md rounded-3xl border border-white/10 bg-neutral-900 p-6 shadow-[0_24px_70px_-28px_rgba(0,0,0,0.7)]">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-500/10 text-red-300">
+                <Music4 className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-white">{t("youtubeConsentTitle")}</h2>
+                <p className="text-sm text-neutral-400">{t("youtubeConsentSubtitle")}</p>
+              </div>
+            </div>
+
+            <p className="mt-5 text-sm leading-6 text-neutral-300">
+              {t("youtubeConsentBody")}
+            </p>
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-neutral-100 transition-all duration-200 hover:bg-white/10 focus-ring"
+                onClick={() => updateConsent("denied")}
+              >
+                {t("youtubeConsentDecline")}
+              </button>
+              <button
+                type="button"
+                className="rounded-full bg-sky-500 px-4 py-2 text-sm font-medium text-white transition-all duration-200 hover:bg-sky-400 focus-ring"
+                onClick={() => updateConsent("granted")}
+              >
+                {t("youtubeConsentAccept")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </TooltipProvider>
   );
 }

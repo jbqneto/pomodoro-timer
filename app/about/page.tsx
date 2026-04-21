@@ -4,8 +4,8 @@ import MainTemplate from "@/components/templates/main";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Sobre",
-  description: "Saiba mais sobre a técnica Pomodoro e o uso de música (Lo-fi, clássica, gregoriano) para concentração.",
+  title: "About Focus Beat",
+  description: "Learn how Focus Beat combines timed focus sessions and background music for concentration.",
 };
 
 export default function AboutPage() {

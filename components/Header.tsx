@@ -16,7 +16,7 @@ export default function Header() {
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
         {/* Brand */}
         <div className="flex items-center gap-2">
-          <span className="text-lg font-semibold">Pomodoro Timer</span>
+          <span className="text-lg font-semibold">Focus Beat</span>
         </div>
 
         {/* Desktop nav */}
