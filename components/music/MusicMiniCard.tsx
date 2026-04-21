@@ -55,14 +55,13 @@ export default function MusicMiniCard() {
               <div className="flex min-w-0 items-center gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-sky-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+                    <div className="flex h-11 w-11 items-center justify-center text-sky-300">
                       <Music4 className="h-5 w-5" />
                     </div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-500">
-                      {t("playerLabel")}
+                      {activePlaylistLabel}
                     </p>
                   </div>
-                  <p className="truncate text-sm font-medium text-neutral-100">{activePlaylistLabel}</p>
                 </div>
               </div>
 
