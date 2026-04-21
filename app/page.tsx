@@ -4,7 +4,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { TimerProvider } from "@/context/TimerContext";
 import { ConfigProvider } from "@/context/ConfigContext";
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/next";
 import Header from "@/components/Header";
 import TimerCard from "@/components/timer/TimerCard";
 import SettingsCard from "@/components/settings/SettingsCard";
@@ -30,18 +30,27 @@ function HomeContent() {
         <SettingsCard />
         <MusicMiniCard />
 
-        <section id="android-app" className="rounded-3xl border border-sky-500/20 bg-sky-500/10 p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-300">{t('androidBadge')}</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">{t('androidTitle')}</h2>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-200 md:text-base">{t('androidDescription')}</p>
-          <Button className="mt-5 rounded-full bg-sky-500 px-6 text-white hover:bg-sky-400">
-            {t('androidCta')}
-          </Button>
-        </section>
+        { /**  androidAppCta() */}
+
       </section>
       <Footer />
     </main>
   );
+
+  /**
+   * TODO: Activate when Android app is ready. For now, it just takes up space and creates expectations that we can't meet yet.
+   * @returns 
+   */
+  function androidAppCta() {
+    return <section id="android-app" className="rounded-3xl border border-sky-500/20 bg-sky-500/10 p-6">
+      <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-300">{t('androidBadge')}</p>
+      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">{t('androidTitle')}</h2>
+      <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-200 md:text-base">{t('androidDescription')}</p>
+      <Button className="mt-5 rounded-full bg-sky-500 px-6 text-white hover:bg-sky-400">
+        {t('androidCta')}
+      </Button>
+    </section>;
+  }
 }
 
 export default function Home() {

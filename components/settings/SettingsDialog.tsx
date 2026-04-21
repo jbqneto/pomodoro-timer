@@ -3,6 +3,7 @@
 import { useConfig } from "@/context/ConfigContext";
 import { useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
+import { PresetSelector } from "../PresetSelector";
 
 type Props = { open: boolean; onClose: () => void };
 
@@ -24,6 +25,11 @@ export default function SettingsDialog({ open, onClose }: Props) {
         <h2 className="mb-4 text-lg font-semibold">{t('settings')}</h2>
 
         <div className="space-y-5">
+          <div>
+            <label className="mb-2 block text-sm font-medium text-neutral-300">{t('timerPreset')}</label>
+            <PresetSelector />
+          </div>
+
           <label className="flex items-center justify-between gap-4">
             <span>🔔 {t('alarm')}</span>
             <input type="checkbox" checked={soundEnabled} onChange={(e) => setSoundEnabled(e.target.checked)} />

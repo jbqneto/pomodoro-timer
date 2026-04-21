@@ -30,6 +30,7 @@ const translations = {
     // Presets
     classic: 'Classic 25/5',
     quick: 'Quick 15min',
+    timerPreset: 'Timer preset',
     
     // Playlist
     lofi: 'Lo-fi',
@@ -99,6 +100,7 @@ const translations = {
     // Presets
     classic: 'Clássico 25/5',
     quick: 'Rápido 15min',
+    timerPreset: 'Preset do timer',
     
     // Playlist
     lofi: 'Lo-fi',

@@ -1,22 +1,12 @@
 "use client";
 
 import { PlaylistSelector } from "../PlaylistSelector";
-import { PresetSelector } from "../PresetSelector";
 import { Music4 } from "lucide-react";
 
 export default function SettingsCard() {
   return (
     <div className="rounded-3xl border border-white/10 bg-neutral-900/70 p-6">
       <div className="grid gap-6">
-        <section>
-          <h3 className="text-sm font-semibold tracking-wider text-neutral-300">TIMER PRESETS</h3>
-          <div className="mt-3">
-            <PresetSelector />
-          </div>
-        </section>
-
-        <hr className="border-white/10" />
-
         <section>
           <div className="flex items-center gap-2 text-neutral-300">
             <Music4 className="h-4 w-4 text-sky-300" />

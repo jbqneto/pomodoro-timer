@@ -128,7 +128,7 @@ export default function MusicMiniCard() {
               </div>
 
               <div className="flex min-w-0 flex-1 items-center gap-3">
-                <span className="text-xs font-medium uppercase tracking-[0.24em] text-neutral-500">
+                <span className="hidden text-xs font-medium uppercase tracking-[0.24em] text-neutral-500 sm:inline">
                   {t("volume")}
                 </span>
                 <input
