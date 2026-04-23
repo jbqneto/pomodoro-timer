@@ -7,7 +7,6 @@ import { ConfigProvider } from "@/context/ConfigContext";
 import { Analytics } from "@vercel/analytics/next";
 import Header from "@/components/Header";
 import TimerCard from "@/components/timer/TimerCard";
-import SettingsCard from "@/components/settings/SettingsCard";
 import MusicMiniCard from "@/components/music/MusicMiniCard";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/context/LanguageContext";
@@ -27,7 +26,6 @@ function HomeContent() {
         </section>
 
         <TimerCard />
-        <SettingsCard />
         <MusicMiniCard />
 
         { /**  androidAppCta() */}
