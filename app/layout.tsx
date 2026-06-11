@@ -1,15 +1,19 @@
 import './globals.css';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 
 const inter = Inter({ subsets: ['latin'] });
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
 
 export const metadata: Metadata = {
   title: 'Focus Beat | Focus Timer With Music',
   description: 'Focus Beat is a focus and break timer with music for deep work, study sessions, and concentration.',
   keywords: 'focus timer, focus timer with music, deep work timer, study timer with music, focus sessions, concentration music',
   authors: [{ name: 'Focus Beat' }],
-  viewport: 'width=device-width, initial-scale=1',
   robots: 'index, follow',
   openGraph: {
     title: 'Focus Beat | Focus Timer With Music',
