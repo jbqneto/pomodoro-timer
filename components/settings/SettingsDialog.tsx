@@ -9,7 +9,7 @@ type Props = { open: boolean; onClose: () => void };
 
 export default function SettingsDialog({ open, onClose }: Props) {
   const { t } = useLanguage();
-  const { soundEnabled, setSoundEnabled, soundVolume, setSoundVolume, autoPlay:autoPlayMusic, setAutoPlay:setAutoPlayMusic } = useConfig();
+  const { soundEnabled, setSoundEnabled, soundVolume, setSoundVolume, musicVolume, setMusicVolume, autoPlay:autoPlayMusic, setAutoPlay:setAutoPlayMusic } = useConfig();
 
   useEffect(() => {
     function onEsc(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
@@ -36,7 +36,7 @@ export default function SettingsDialog({ open, onClose }: Props) {
           </label>
 
           <div className={`${soundEnabled ? "opacity-100" : "opacity-50 pointer-events-none"}`}>
-            <label className="mb-1 block text-sm text-neutral-300">{t('volume')}</label>
+            <label className="mb-1 block text-sm text-neutral-300">{t('alarmVolume')}</label>
             <input
               type="range"
               min={0}
@@ -51,6 +51,18 @@ export default function SettingsDialog({ open, onClose }: Props) {
             <span>🎵 {t('startMusicWithTimer')}</span>
             <input type="checkbox" checked={autoPlayMusic} onChange={(e) => setAutoPlayMusic(e.target.checked)} />
           </label>
+
+          <div>
+            <label className="mb-1 block text-sm text-neutral-300">{t('musicVolume')}</label>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={musicVolume}
+              onChange={(e) => setMusicVolume(Number(e.target.value))}
+              className="h-1 w-full appearance-none rounded bg-white/10 accent-sky-400"
+            />
+          </div>
         </div>
 
         <button className="mt-6 w-full rounded-xl bg-sky-500 px-4 py-2 font-semibold text-white hover:bg-sky-400" onClick={onClose}>

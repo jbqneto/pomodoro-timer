@@ -13,8 +13,10 @@ interface ConfigContextType {
   autoPlay: boolean;
   activePlaylist: PlaylistType | null;
   soundVolume: number;
+  musicVolume: number;
   setAutoPlay: (enabled: boolean) => void;
   setSoundVolume: (volume: number) => void;
+  setMusicVolume: (volume: number) => void;
   setActivePlaylist: (playlist: PlaylistType | null) => void;
   setSoundEnabled: (enabled: boolean) => void;
   getPlaylistId: (playlist: PlaylistType) => string;
@@ -27,7 +29,8 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
   const [activePlaylist, setActivePlaylist] = useState<PlaylistType | null>('catholic');
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [autoPlay, setAutoPlay] = useState(true);
-  const [soundVolume, setSoundVolume] = useState(80); // Default volume
+  const [soundVolume, setSoundVolume] = useState(80);
+  const [musicVolume, setMusicVolume] = useState(80);
 
   const getPlaylistId = (playlist: PlaylistType) => {
     return playlists[playlist];
@@ -52,6 +55,10 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
         setSoundVolume(parsed.soundVolume);
       }
 
+      if (typeof parsed.musicVolume === "number") {
+        setMusicVolume(parsed.musicVolume);
+      }
+
       if (parsed.activePlaylist === null || parsed.activePlaylist === "lofi" || parsed.activePlaylist === "classical" || parsed.activePlaylist === "catholic") {
         setActivePlaylist(parsed.activePlaylist);
       }
@@ -68,9 +75,10 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
         soundEnabled,
         autoPlay,
         soundVolume,
+        musicVolume,
       }),
     );
-  }, [activePlaylist, soundEnabled, autoPlay, soundVolume]);
+  }, [activePlaylist, soundEnabled, autoPlay, soundVolume, musicVolume]);
   
   return (
     <ConfigContext.Provider value={{
@@ -78,8 +86,10 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
       activePlaylist,
       autoPlay,
       soundVolume,
+      musicVolume,
       setAutoPlay,
       setSoundVolume,
+      setMusicVolume,
       setActivePlaylist,
       setSoundEnabled,
       getPlaylistId
