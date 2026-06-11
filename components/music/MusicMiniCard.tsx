@@ -13,7 +13,7 @@ const PLAYLIST_OPTIONS: PlaylistType[] = ["catholic", "lofi", "classical"];
 
 export default function MusicMiniCard() {
   const { t } = useLanguage();
-  const { activePlaylist, soundVolume, setActivePlaylist, setSoundVolume } = useConfig();
+  const { activePlaylist, musicVolume, setActivePlaylist, setMusicVolume } = useConfig();
   const playerRef = useRef<YoutubePlayerRef>(null);
   const [expanded, setExpanded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -27,7 +27,7 @@ export default function MusicMiniCard() {
   }
 
   function handleVolumeChange(event: ChangeEvent<HTMLInputElement>): void {
-    setSoundVolume(Number(event.target.value));
+    setMusicVolume(Number(event.target.value));
   }
 
   function handlePlaylistChange(event: ChangeEvent<HTMLSelectElement>): void {
@@ -37,8 +37,8 @@ export default function MusicMiniCard() {
   }
 
   useEffect(() => {
-    updateVolume(soundVolume);
-  }, [soundVolume]);
+    updateVolume(musicVolume);
+  }, [musicVolume]);
 
   useEffect(() => {
     if (activePlaylist === null) {
@@ -207,7 +207,7 @@ export default function MusicMiniCard() {
                   {t("volume")}
                 </span>
                 <input
-                  value={soundVolume}
+                  value={musicVolume}
                   onChange={handleVolumeChange}
                   type="range"
                   min={0}
@@ -218,7 +218,7 @@ export default function MusicMiniCard() {
               </div>
 
               <span className="w-10 text-right text-sm font-medium tabular-nums text-neutral-300">
-                {soundVolume}
+                {musicVolume}
               </span>
             </div>
           </div>

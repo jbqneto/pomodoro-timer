@@ -19,10 +19,9 @@ function HomeContent() {
     <main className="min-h-dvh bg-neutral-950 text-neutral-100">
       <Header />
       <section className="mx-auto mt-6 max-w-3xl px-4 space-y-6">
-        <section className="rounded-3xl border border-white/10 bg-neutral-900/70 p-6">
+        <section className="rounded-3xl border border-white/10 bg-neutral-900/70 px-6 py-4">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-400">{t('heroEyebrow')}</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white md:text-4xl">{t('heroTitle')}</h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-300 md:text-base">{t('heroDescription')}</p>
+          <h1 className="mt-2 text-sm leading-6 text-neutral-300">{t('heroTitle')}</h1>
         </section>
 
         <TimerCard />

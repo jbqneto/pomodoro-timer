@@ -19,7 +19,7 @@ export interface YoutubePlayerRef {
 
 const YouTubePlayer = forwardRef<YoutubePlayerRef, PlayerProperties>(({ width = 640, height = 360, onPlaybackStateChange }, ref) => {
     
-  const { activePlaylist, autoPlay, soundVolume, getPlaylistId } = useConfig();
+  const { activePlaylist, autoPlay, musicVolume, getPlaylistId } = useConfig();
   const { state } = useTimer();
   const containerId = useRef(`yt-${Math.random().toString(36).slice(2)}`);
   const playerRef = useRef<any>(null);
@@ -110,7 +110,7 @@ const YouTubePlayer = forwardRef<YoutubePlayerRef, PlayerProperties>(({ width = 
             playVideo();
           }
 
-          try { playerRef.current.setVolume(soundVolume); } catch {}
+          try { playerRef.current.setVolume(musicVolume); } catch {}
         },
         onStateChange: (event: { data: number }) => {
           // @ts-ignore
@@ -130,8 +130,8 @@ const YouTubePlayer = forwardRef<YoutubePlayerRef, PlayerProperties>(({ width = 
   useEffect(() => {
     if (!playerRef.current) return;
 
-    setVolume(soundVolume);
-  }, [soundVolume]);
+    setVolume(musicVolume);
+  }, [musicVolume]);
 
   useEffect(() => {
     if (!playerRef.current) return;

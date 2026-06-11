@@ -2,7 +2,6 @@
 
 import { useLanguage } from "@/context/LanguageContext";
 import { useState } from "react";
-import { ThemeToggle } from "./ThemeToggle";
 import SettingsDialog from "./settings/SettingsDialog";
 import Link from "next/link";
 
@@ -43,8 +42,6 @@ export default function Header() {
             </button>
           </div>
 
-          <ThemeToggle />
-
           {/* Settings gear */}
           <button
             className="rounded-full p-2 text-neutral-400 hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-500/30"
@@ -81,8 +78,7 @@ export default function Header() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <ThemeToggle />
+            <div className="flex items-center justify-end">
               <button className="rounded-full p-2 text-neutral-400 hover:bg-white/5" aria-label={t('settings')} onClick={()=>setOpen(true)}>⚙</button>
             </div>
           </div>

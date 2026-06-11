@@ -80,6 +80,8 @@ const translations = {
     // Settings
     alarm: 'Alarm',
     volume: 'Volume',
+    alarmVolume: 'Alarm volume',
+    musicVolume: 'Music volume',
     startMusicWithTimer: 'Start music with timer',
 
     // About
@@ -160,6 +162,8 @@ const translations = {
     // Settings
     alarm: 'Alarme',
     volume: 'Volume',
+    alarmVolume: 'Volume do alarme',
+    musicVolume: 'Volume da música',
     startMusicWithTimer: 'Iniciar música com o timer',
 
     // About
