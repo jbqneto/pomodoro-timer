@@ -5,8 +5,6 @@ import { useTimer } from '@/context/TimerContext';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 type PlayerProperties = {
-  width?: number;
-  height?: number;
   onPlaybackStateChange?: (isPlaying: boolean) => void;
 }
 
@@ -17,7 +15,7 @@ export interface YoutubePlayerRef {
   setVolume: (volume: number) => void;
 }
 
-const YouTubePlayer = forwardRef<YoutubePlayerRef, PlayerProperties>(({ width = 640, height = 360, onPlaybackStateChange }, ref) => {
+const YouTubePlayer = forwardRef<YoutubePlayerRef, PlayerProperties>(({ onPlaybackStateChange }, ref) => {
     
   const { activePlaylist, autoPlay, musicVolume, getPlaylistId } = useConfig();
   const { state } = useTimer();
@@ -91,14 +89,16 @@ const YouTubePlayer = forwardRef<YoutubePlayerRef, PlayerProperties>(({ width = 
 
     playerRef.current = new YT.Player(containerId.current, {
       host: "https://www.youtube-nocookie.com",
-      height: '' + height,
-      width: '' + width,
+      height: '100%',
+      width: '100%',
       playerVars: {
         listType: "playlist",
         list: playlistId,
         rel: 0,
         autoplay: 0,
-        controls: 1,
+        controls: 0,
+        disablekb: 1,
+        fs: 0,
         modestbranding: 1,
         // necessário para JS API
         enablejsapi: 1,
@@ -106,6 +106,8 @@ const YouTubePlayer = forwardRef<YoutubePlayerRef, PlayerProperties>(({ width = 
       },
       events: {
         onReady: () => {
+          playerRef.current.getIframe().setAttribute("tabindex", "-1");
+
           if (state === 'running' && autoPlay) {
             playVideo();
           }
@@ -148,7 +150,7 @@ const YouTubePlayer = forwardRef<YoutubePlayerRef, PlayerProperties>(({ width = 
 
   return (
     <div className="w-full aspect-video overflow-hidden rounded-xl">
-      <div id={containerId.current} className="w-full h-full" />
+      <div id={containerId.current} className="pointer-events-none h-full w-full" />
     </div>
   );
 });

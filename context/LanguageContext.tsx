@@ -30,7 +30,11 @@ const translations = {
     // Presets
     classic: 'Classic 25/5',
     quick: 'Quick 15min',
+    custom: 'Custom',
     timerPreset: 'Timer preset',
+    focusDuration: 'Focus',
+    shortBreak: 'Short break',
+    longBreak: 'Long break',
     
     // Playlist
     lofi: 'Lo-fi',
@@ -112,7 +116,11 @@ const translations = {
     // Presets
     classic: 'Clássico 25/5',
     quick: 'Rápido 15min',
+    custom: 'Personalizado',
     timerPreset: 'Preset do timer',
+    focusDuration: 'Foco',
+    shortBreak: 'Pausa curta',
+    longBreak: 'Pausa longa',
     
     // Playlist
     lofi: 'Lo-fi',

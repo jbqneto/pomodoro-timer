@@ -3,6 +3,7 @@
 import { useTimer } from "@/context/TimerContext";
 import { Timer } from "../Timer";
 import { Controls } from "./Controls";
+import MusicMiniCard from "../music/MusicMiniCard";
 
 export default function TimerCard() {
   const { phase } = useTimer();
@@ -24,12 +25,20 @@ export default function TimerCard() {
         }`}
       />
 
-      <div className="relative mx-auto max-w-md">
-        <Timer />
-      </div>
+      <div className="relative grid gap-7 lg:grid-cols-[minmax(0,1.16fr)_minmax(19rem,0.84fr)] lg:items-stretch lg:gap-0">
+        <div className="min-w-0 lg:border-r lg:border-white/10 lg:pr-7">
+          <MusicMiniCard />
+        </div>
 
-      <div className="relative mx-auto mt-5 max-w-md">
-        <Controls />
+        <div className="flex min-w-0 flex-col lg:pl-7">
+          <div className="mx-auto w-full max-w-md">
+            <Timer />
+          </div>
+
+          <div className="mx-auto mt-auto w-full max-w-md pt-4">
+            <Controls />
+          </div>
+        </div>
       </div>
     </section>
   );
