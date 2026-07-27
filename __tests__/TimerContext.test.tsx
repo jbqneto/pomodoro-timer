@@ -126,6 +126,34 @@ describe('TimerContext', () => {
     expect(result.current.seconds).toBe(0)
   })
 
+  it('uses custom focus, short break, and long break durations', () => {
+    const { result } = renderHook(() => useTimer(), { wrapper })
+
+    act(() => {
+      result.current.setCustomPreset({ focus: 1, break: 1, longBreak: 2 })
+    })
+
+    expect(result.current.preset).toBe('custom')
+    expect(result.current.minutes).toBe(1)
+
+    for (let i = 0; i < 3; i++) {
+      act(() => { result.current.startTimer() })
+      act(() => { vi.advanceTimersByTime(60 * 1000) })
+      expect(result.current.minutes).toBe(1)
+
+      act(() => { result.current.startTimer() })
+      act(() => { vi.advanceTimersByTime(60 * 1000) })
+    }
+
+    expect(result.current.session).toBe(4)
+
+    act(() => { result.current.startTimer() })
+    act(() => { vi.advanceTimersByTime(60 * 1000) })
+
+    expect(result.current.phase).toBe('break')
+    expect(result.current.minutes).toBe(2)
+  })
+
   it('does not reset timer when preset is changed while running', () => {
     const { result } = renderHook(() => useTimer(), { wrapper })
     act(() => { result.current.setPreset('25/5') })

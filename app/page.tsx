@@ -7,7 +7,6 @@ import { ConfigProvider } from "@/context/ConfigContext";
 import { Analytics } from "@vercel/analytics/next";
 import Header from "@/components/Header";
 import TimerCard from "@/components/timer/TimerCard";
-import MusicMiniCard from "@/components/music/MusicMiniCard";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/context/LanguageContext";
 import { Button } from "@/components/ui/button";
@@ -18,14 +17,13 @@ function HomeContent() {
   return (
     <main className="min-h-dvh bg-neutral-950 text-neutral-100">
       <Header />
-      <section className="mx-auto mt-6 max-w-3xl px-4 space-y-6">
-        <section className="rounded-3xl border border-white/10 bg-neutral-900/70 px-6 py-4">
+      <section className="mx-auto mt-6 max-w-5xl px-4 space-y-6">
+        <section className="px-1 py-2">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-400">{t('heroEyebrow')}</p>
           <h1 className="mt-2 text-sm leading-6 text-neutral-300">{t('heroTitle')}</h1>
         </section>
 
         <TimerCard />
-        <MusicMiniCard />
 
         { /**  androidAppCta() */}
 
