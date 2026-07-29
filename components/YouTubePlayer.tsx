@@ -12,6 +12,8 @@ export interface YoutubePlayerRef {
   playVideo: () => void;
   pauseVideo: () => void;
   stopVideo: () => void;
+  previousVideo: () => void;
+  nextVideo: () => void;
   setVolume: (volume: number) => void;
 }
 
@@ -39,6 +41,16 @@ const YouTubePlayer = forwardRef<YoutubePlayerRef, PlayerProperties>(({ onPlayba
     try { playerRef.current.stopVideo(); } catch {}
   }
 
+  const previousVideo = () => {
+    if (!playerRef.current) return;
+    try { playerRef.current.previousVideo(); } catch {}
+  }
+
+  const nextVideo = () => {
+    if (!playerRef.current) return;
+    try { playerRef.current.nextVideo(); } catch {}
+  }
+
   const setVolume = (volume: number) => {
     if (!playerRef.current) return;
     try { playerRef.current.setVolume(volume); } catch {}
@@ -53,6 +65,12 @@ const YouTubePlayer = forwardRef<YoutubePlayerRef, PlayerProperties>(({ onPlayba
     },
     stopVideo: () => {
       stopVideo();
+    },
+    previousVideo: () => {
+      previousVideo();
+    },
+    nextVideo: () => {
+      nextVideo();
     },
     setVolume: (volume: number) => {
       setVolume(volume);

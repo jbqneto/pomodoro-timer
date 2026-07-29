@@ -4,7 +4,7 @@ import { ChangeEvent, useEffect, useRef, useState } from "react";
 import YouTubePlayer, { YoutubePlayerRef } from "../YouTubePlayer";
 import { useLanguage } from "@/context/LanguageContext";
 import { useConfig } from "@/context/ConfigContext";
-import { ChevronDown, Music4, Pause, Play, Volume2 } from "lucide-react";
+import { ChevronDown, Music4, Pause, Play, SkipBack, SkipForward, Volume2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 const YOUTUBE_CONSENT_KEY = "youtube-media-consent";
@@ -59,6 +59,16 @@ export default function MusicMiniCard() {
 
     playerRef.current.playVideo();
     setIsPlaying(true);
+  }
+
+  function playPreviousTrack() {
+    if (consent !== "granted") return;
+    playerRef.current?.previousVideo();
+  }
+
+  function playNextTrack() {
+    if (consent !== "granted") return;
+    playerRef.current?.nextVideo();
   }
 
   function updateConsent(nextConsent: "granted" | "denied") {
@@ -130,6 +140,22 @@ export default function MusicMiniCard() {
             <TooltipTrigger asChild>
               <button
                 type="button"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-neutral-100 transition-all duration-200 hover:-translate-y-px hover:bg-white/10 focus-ring disabled:cursor-not-allowed disabled:text-neutral-500 disabled:hover:translate-y-0 disabled:hover:bg-white/5"
+                onClick={playPreviousTrack}
+                aria-label={t("previousTrack")}
+                disabled={consent !== "granted"}
+              >
+                <SkipBack className="h-4 w-4" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent className="border-white/10 bg-neutral-900 text-neutral-100">
+              {t("previousTrack")}
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
                 className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-sky-500 text-white transition-all duration-200 hover:-translate-y-px hover:bg-sky-400 focus-ring disabled:cursor-not-allowed disabled:bg-neutral-700 disabled:text-neutral-400 disabled:hover:translate-y-0"
                 onClick={togglePlayback}
                 aria-pressed={isPlaying}
@@ -141,6 +167,23 @@ export default function MusicMiniCard() {
             </TooltipTrigger>
             <TooltipContent className="border-white/10 bg-neutral-900 text-neutral-100">
               {isPlaying ? t("pauseVideo") : t("playVideo")}
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-neutral-100 transition-all duration-200 hover:-translate-y-px hover:bg-white/10 focus-ring disabled:cursor-not-allowed disabled:text-neutral-500 disabled:hover:translate-y-0 disabled:hover:bg-white/5"
+                onClick={playNextTrack}
+                aria-label={t("nextTrack")}
+                disabled={consent !== "granted"}
+              >
+                <SkipForward className="h-4 w-4" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent className="border-white/10 bg-neutral-900 text-neutral-100">
+              {t("nextTrack")}
             </TooltipContent>
           </Tooltip>
 

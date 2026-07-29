@@ -14,6 +14,17 @@ function wrapper({ children }: { children: React.ReactNode }) {
 
 const FOCUS_15_MS = 15 * 60 * 1000
 const BREAK_2_MS = 2 * 60 * 1000
+const SESSION_HISTORY_STORAGE_KEY = 'focus-timer-session-history'
+
+function createHistoryEntry(completedAt: string) {
+  return {
+    id: 'session-1',
+    phase: 'focus' as const,
+    durationMinutes: 25,
+    completedAt,
+    task: 'Write tests',
+  }
+}
 
 describe('TimerContext', () => {
   beforeEach(() => {
@@ -162,5 +173,57 @@ describe('TimerContext', () => {
     const timeWhileRunning = result.current.minutes * 60 + result.current.seconds
     act(() => { result.current.setPreset('15') })
     expect(result.current.minutes * 60 + result.current.seconds).toBe(timeWhileRunning)
+  })
+
+  it('restores the most recently saved daily history', () => {
+    const session = createHistoryEntry('2026-07-28T10:00:00.000Z')
+    localStorage.setItem(SESSION_HISTORY_STORAGE_KEY, JSON.stringify({
+      date: '2026-07-28',
+      sessions: [session],
+    }))
+
+    const { result } = renderHook(() => useTimer(), { wrapper })
+
+    expect(result.current.sessionHistoryDate).toBe('2026-07-28')
+    expect(result.current.sessionHistory).toEqual([session])
+  })
+
+  it('starts a fresh daily history when a timer begins on a new day', () => {
+    vi.setSystemTime(new Date('2026-07-29T09:00:00.000Z'))
+    const session = createHistoryEntry('2026-07-28T10:00:00.000Z')
+    localStorage.setItem(SESSION_HISTORY_STORAGE_KEY, JSON.stringify({
+      date: '2026-07-28',
+      sessions: [session],
+    }))
+
+    const { result } = renderHook(() => useTimer(), { wrapper })
+    act(() => { result.current.startTimer() })
+
+    expect(result.current.sessionHistoryDate).toBe('2026-07-29')
+    expect(result.current.sessionHistory).toEqual([])
+    expect(JSON.parse(localStorage.getItem(SESSION_HISTORY_STORAGE_KEY) ?? '{}')).toEqual({
+      date: '2026-07-29',
+      sessions: [],
+    })
+  })
+
+  it('persists completed sessions with their local date', () => {
+    vi.setSystemTime(new Date('2026-07-29T09:00:00.000Z'))
+    const { result } = renderHook(() => useTimer(), { wrapper })
+
+    act(() => {
+      result.current.setCustomPreset({ focus: 1, break: 1, longBreak: 2 })
+      result.current.startTimer()
+      vi.advanceTimersByTime(60 * 1000)
+    })
+
+    expect(JSON.parse(localStorage.getItem(SESSION_HISTORY_STORAGE_KEY) ?? '{}')).toMatchObject({
+      date: '2026-07-29',
+      sessions: [expect.objectContaining({
+        phase: 'focus',
+        durationMinutes: 1,
+        completedAt: '2026-07-29T09:01:00.000Z',
+      })],
+    })
   })
 })

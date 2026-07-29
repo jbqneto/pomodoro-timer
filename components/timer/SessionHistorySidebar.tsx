@@ -10,8 +10,14 @@ type Props = {
 };
 
 export function SessionHistorySidebar({ open, onOpenChange }: Props) {
-  const { sessionHistory, clearSessionHistory } = useTimer();
+  const { sessionHistory, sessionHistoryDate, clearSessionHistory } = useTimer();
   const { t, language } = useLanguage();
+
+  const formattedHistoryDate = new Intl.DateTimeFormat(language === "pt" ? "pt-PT" : "en-US", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(`${sessionHistoryDate}T12:00:00`));
 
   const formatCompletedAt = (completedAt: string) => {
     const date = new Date(completedAt);
@@ -33,7 +39,11 @@ export function SessionHistorySidebar({ open, onOpenChange }: Props) {
       aria-label={t("sessionHistory")}
     >
       <div className={`flex h-16 shrink-0 items-center border-b border-white/10 ${open ? "justify-between px-4" : "justify-center"}`}>
-        {open && <h2 className="text-sm font-semibold tracking-wide text-neutral-100">{t("sessionHistory")}</h2>}
+        {open && (
+          <h2 className="text-sm font-semibold tracking-wide text-neutral-100">
+            {t("sessionHistory")} - {formattedHistoryDate}
+          </h2>
+        )}
         <button
           type="button"
           className="grid h-10 w-10 place-items-center rounded-xl text-sky-200 transition hover:bg-sky-400/10 hover:text-sky-100 focus-ring"
@@ -83,8 +93,7 @@ export function SessionHistorySidebar({ open, onOpenChange }: Props) {
                             <Icon className="h-4 w-4" aria-hidden="true" />
                           </span>
                           <div className="min-w-0 flex-1">
-                            <div className="flex items-center justify-between gap-2 text-sm">
-                              <span className="font-medium text-neutral-100">{isFocus ? t("focus") : t("break")}</span>
+                            <div className="text-right text-sm">
                               <span className="shrink-0 text-neutral-400">{entry.durationMinutes} {t("minutesShort")}</span>
                             </div>
                             {entry.task && (

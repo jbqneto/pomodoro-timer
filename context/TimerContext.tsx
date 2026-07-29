@@ -22,6 +22,11 @@ export type SessionHistoryEntry = {
   task: string;
 };
 
+type SessionHistoryStorage = {
+  date: string;
+  sessions: SessionHistoryEntry[];
+};
+
 interface TimerContextType {
   minutes: number;
   seconds: number;
@@ -31,7 +36,9 @@ interface TimerContextType {
   preset: TimerPreset;
   customPreset: PresetSettings;
   task: string;
+  isTaskLocked: boolean;
   sessionHistory: SessionHistoryEntry[];
+  sessionHistoryDate: string;
   
   startTimer: () => void;
   pauseTimer: () => void;
@@ -40,6 +47,7 @@ interface TimerContextType {
   setPreset: (preset: TimerPreset) => void;
   setCustomPreset: (settings: PresetSettings) => void;
   setTask: (task: string) => void;
+  setTaskLocked: (isLocked: boolean) => void;
   clearSessionHistory: () => void;
 }
 
@@ -54,6 +62,7 @@ const QUICK_PRESET: PresetSettings = { focus: 15, break: 2, longBreak: 5 };
 const DEFAULT_CUSTOM_PRESET: PresetSettings = { focus: 25, break: 5, longBreak: 15 };
 const CUSTOM_PRESET_STORAGE_KEY = 'focus-timer-custom-preset';
 const CURRENT_TASK_STORAGE_KEY = 'focus-timer-current-task';
+const CURRENT_TASK_LOCKED_STORAGE_KEY = 'focus-timer-current-task-locked';
 const SESSION_HISTORY_STORAGE_KEY = 'focus-timer-session-history';
 const MAX_HISTORY_ENTRIES = 100;
 
@@ -77,8 +86,49 @@ function isValidHistoryEntry(value: unknown): value is SessionHistoryEntry {
     entry.durationMinutes >= 1 &&
     entry.durationMinutes <= 180 &&
     typeof entry.completedAt === 'string' &&
+    !Number.isNaN(new Date(entry.completedAt).getTime()) &&
     typeof entry.task === 'string'
   );
+}
+
+function getLocalDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
+function isValidDateKey(value: unknown): value is string {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+
+  return !Number.isNaN(new Date(`${value}T12:00:00`).getTime());
+}
+
+function getStoredSessionHistory(value: unknown): SessionHistoryStorage | null {
+  if (Array.isArray(value)) {
+    const sessions = value.filter(isValidHistoryEntry).slice(0, MAX_HISTORY_ENTRIES);
+    if (sessions.length === 0) return null;
+
+    const date = getLocalDateKey(new Date(sessions[0].completedAt));
+    return {
+      date,
+      sessions: sessions.filter((session) => getLocalDateKey(new Date(session.completedAt)) === date),
+    };
+  }
+
+  if (!value || typeof value !== 'object') return null;
+
+  const storedHistory = value as SessionHistoryStorage;
+  if (!isValidDateKey(storedHistory.date) || !Array.isArray(storedHistory.sessions)) return null;
+
+  return {
+    date: storedHistory.date,
+    sessions: storedHistory.sessions
+      .filter(isValidHistoryEntry)
+      .filter((session) => getLocalDateKey(new Date(session.completedAt)) === storedHistory.date)
+      .slice(0, MAX_HISTORY_ENTRIES),
+  };
 }
 
 const TimerContext = createContext<TimerContextType | undefined>(undefined);
@@ -92,7 +142,11 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   const [customPreset, setCustomPresetState] = useState<PresetSettings>(DEFAULT_CUSTOM_PRESET);
   const [seconds, setSeconds] = useState(DEFAULT_PRESET.focus * 60);
   const [task, setTaskState] = useState('');
-  const [sessionHistory, setSessionHistory] = useState<SessionHistoryEntry[]>([]);
+  const [isTaskLocked, setTaskLockedState] = useState(false);
+  const [sessionHistoryStorage, setSessionHistoryStorage] = useState<SessionHistoryStorage>(() => ({
+    date: getLocalDateKey(),
+    sessions: [],
+  }));
   const [isStorageHydrated, setIsStorageHydrated] = useState(false);
   const alarmRef = useRef<HTMLAudioElement | null>(null);
 
@@ -140,14 +194,23 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     setTaskState(nextTask.slice(0, 160));
   }, []);
 
+  const setTaskLocked = useCallback((isLocked: boolean) => {
+    setTaskLockedState(isLocked);
+  }, []);
+
   const clearSessionHistory = useCallback(() => {
-    setSessionHistory([]);
+    setSessionHistoryStorage((history) => ({ ...history, sessions: [] }));
   }, []);
 
   const startTimer = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
+
+    const today = getLocalDateKey();
+    setSessionHistoryStorage((history) => (
+      history.date === today ? history : { date: today, sessions: [] }
+    ));
 
     setState('running');
 
@@ -208,17 +271,22 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    const storedTask = window.localStorage.getItem(CURRENT_TASK_STORAGE_KEY);
-    if (storedTask) {
-      setTaskState(storedTask.slice(0, 160));
-    }
+    const storedTask = window.localStorage.getItem(CURRENT_TASK_STORAGE_KEY) ?? '';
+    const nextTask = storedTask.slice(0, 160);
+    setTaskState(nextTask);
+    setTaskLockedState(
+      window.localStorage.getItem(CURRENT_TASK_LOCKED_STORAGE_KEY) === 'true' && nextTask.trim().length > 0,
+    );
 
     const storedHistory = window.localStorage.getItem(SESSION_HISTORY_STORAGE_KEY);
     if (storedHistory) {
       try {
         const parsed = JSON.parse(storedHistory);
-        if (Array.isArray(parsed)) {
-          setSessionHistory(parsed.filter(isValidHistoryEntry).slice(0, MAX_HISTORY_ENTRIES));
+        const history = getStoredSessionHistory(parsed);
+        if (history) {
+          setSessionHistoryStorage(history);
+        } else {
+          window.localStorage.removeItem(SESSION_HISTORY_STORAGE_KEY);
         }
       } catch {
         window.localStorage.removeItem(SESSION_HISTORY_STORAGE_KEY);
@@ -236,8 +304,9 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     if (!isStorageHydrated) return;
 
     window.localStorage.setItem(CURRENT_TASK_STORAGE_KEY, task);
-    window.localStorage.setItem(SESSION_HISTORY_STORAGE_KEY, JSON.stringify(sessionHistory));
-  }, [isStorageHydrated, sessionHistory, task]);
+    window.localStorage.setItem(CURRENT_TASK_LOCKED_STORAGE_KEY, String(isTaskLocked));
+    window.localStorage.setItem(SESSION_HISTORY_STORAGE_KEY, JSON.stringify(sessionHistoryStorage));
+  }, [isStorageHydrated, isTaskLocked, sessionHistoryStorage, task]);
 
   useEffect(() => {
     if (seconds === 0) {
@@ -260,16 +329,23 @@ export function TimerProvider({ children }: { children: ReactNode }) {
           ? presetSettings.longBreak
           : presetSettings.break;
 
-      setSessionHistory((history) => [
-        {
-          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-          phase,
-          durationMinutes: completedDuration,
-          completedAt: new Date().toISOString(),
-          task: task.trim(),
-        },
-        ...history,
-      ].slice(0, MAX_HISTORY_ENTRIES));
+      const completedAt = new Date();
+      const completedSession: SessionHistoryEntry = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        phase,
+        durationMinutes: completedDuration,
+        completedAt: completedAt.toISOString(),
+        task: task.trim(),
+      };
+      const completedDate = getLocalDateKey(completedAt);
+
+      setSessionHistoryStorage((history) => ({
+        date: completedDate,
+        sessions: [
+          completedSession,
+          ...(history.date === completedDate ? history.sessions : []),
+        ].slice(0, MAX_HISTORY_ENTRIES),
+      }));
 
       if (phase === 'focus') {
         setPhase('break');
@@ -303,7 +379,9 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       preset,
       customPreset,
       task,
-      sessionHistory,
+      isTaskLocked,
+      sessionHistory: sessionHistoryStorage.sessions,
+      sessionHistoryDate: sessionHistoryStorage.date,
       startTimer,
       pauseTimer,
       resumeTimer,
@@ -311,6 +389,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       setPreset,
       setCustomPreset,
       setTask,
+      setTaskLocked,
       clearSessionHistory,
     }}>
       {children}
