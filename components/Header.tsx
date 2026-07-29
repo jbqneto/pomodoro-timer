@@ -4,8 +4,13 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useState } from "react";
 import SettingsDialog from "./settings/SettingsDialog";
 import Link from "next/link";
+import { History } from "lucide-react";
 
-export default function Header() {
+type HeaderProps = {
+  onOpenHistory?: () => void;
+};
+
+export default function Header({ onOpenHistory }: HeaderProps) {
   const { t,language, setLanguage } = useLanguage();
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -64,11 +69,25 @@ export default function Header() {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="border-t border-white/10 md:hidden">
+        <div className="absolute inset-x-0 top-full z-50 border-b border-white/10 bg-neutral-950/95 shadow-2xl backdrop-blur md:hidden">
           <div className="mx-auto flex max-w-5xl flex-col gap-2 px-4 py-3">
             <Link className="text-sm text-neutral-200" href="/" onClick={()=>setMenuOpen(false)}>{t('home')}</Link>
             <Link className="text-sm text-neutral-200" href="/about" onClick={()=>setMenuOpen(false)}>{t('about')}</Link>
             <a className="text-sm text-neutral-200" href="#android-app" onClick={()=>setMenuOpen(false)}>{t('androidApp')}</a>
+
+            {onOpenHistory && (
+              <button
+                type="button"
+                className="flex items-center gap-2 py-1 text-left text-sm text-neutral-200"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onOpenHistory();
+                }}
+              >
+                <History className="h-4 w-4 text-sky-300" />
+                {t('sessionHistory')}
+              </button>
+            )}
 
             <div className="flex items-center gap-2">
               <span className="text-sm text-neutral-400">{t('language')}</span>

@@ -4,6 +4,7 @@ import { useTimer } from "@/context/TimerContext";
 import { Timer } from "../Timer";
 import { Controls } from "./Controls";
 import MusicMiniCard from "../music/MusicMiniCard";
+import { TaskInput } from "./TaskInput";
 
 export default function TimerCard() {
   const { phase } = useTimer();
@@ -36,7 +37,10 @@ export default function TimerCard() {
           </div>
 
           <div className="mx-auto mt-auto w-full max-w-md pt-4">
-            <Controls />
+            <TaskInput />
+            <div className="mt-3">
+              <Controls />
+            </div>
           </div>
         </div>
       </div>

@@ -14,6 +14,14 @@ export type PresetSettings = {
 
 export type TimerPreset = '25/5' | '15' | 'custom';
 
+export type SessionHistoryEntry = {
+  id: string;
+  phase: Phase;
+  durationMinutes: number;
+  completedAt: string;
+  task: string;
+};
+
 interface TimerContextType {
   minutes: number;
   seconds: number;
@@ -22,6 +30,8 @@ interface TimerContextType {
   session: number;
   preset: TimerPreset;
   customPreset: PresetSettings;
+  task: string;
+  sessionHistory: SessionHistoryEntry[];
   
   startTimer: () => void;
   pauseTimer: () => void;
@@ -29,6 +39,8 @@ interface TimerContextType {
   stopTimer: () => void;
   setPreset: (preset: TimerPreset) => void;
   setCustomPreset: (settings: PresetSettings) => void;
+  setTask: (task: string) => void;
+  clearSessionHistory: () => void;
 }
 
 const ENV_PRESET_25 = (process.env.NEXT_PUBLIC_PRESET_25 || '25,5,15').split(',');
@@ -41,6 +53,9 @@ const DEFAULT_PRESET: PresetSettings = {
 const QUICK_PRESET: PresetSettings = { focus: 15, break: 2, longBreak: 5 };
 const DEFAULT_CUSTOM_PRESET: PresetSettings = { focus: 25, break: 5, longBreak: 15 };
 const CUSTOM_PRESET_STORAGE_KEY = 'focus-timer-custom-preset';
+const CURRENT_TASK_STORAGE_KEY = 'focus-timer-current-task';
+const SESSION_HISTORY_STORAGE_KEY = 'focus-timer-session-history';
+const MAX_HISTORY_ENTRIES = 100;
 
 function isValidPresetSettings(value: unknown): value is PresetSettings {
   if (!value || typeof value !== 'object') return false;
@@ -48,6 +63,21 @@ function isValidPresetSettings(value: unknown): value is PresetSettings {
   const settings = value as PresetSettings;
   return [settings.focus, settings.break, settings.longBreak].every(
     (duration) => Number.isInteger(duration) && duration >= 1 && duration <= 180,
+  );
+}
+
+function isValidHistoryEntry(value: unknown): value is SessionHistoryEntry {
+  if (!value || typeof value !== 'object') return false;
+
+  const entry = value as SessionHistoryEntry;
+  return (
+    typeof entry.id === 'string' &&
+    (entry.phase === 'focus' || entry.phase === 'break') &&
+    Number.isInteger(entry.durationMinutes) &&
+    entry.durationMinutes >= 1 &&
+    entry.durationMinutes <= 180 &&
+    typeof entry.completedAt === 'string' &&
+    typeof entry.task === 'string'
   );
 }
 
@@ -61,6 +91,9 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   const [preset, setPresetState] = useState<TimerPreset>('25/5');
   const [customPreset, setCustomPresetState] = useState<PresetSettings>(DEFAULT_CUSTOM_PRESET);
   const [seconds, setSeconds] = useState(DEFAULT_PRESET.focus * 60);
+  const [task, setTaskState] = useState('');
+  const [sessionHistory, setSessionHistory] = useState<SessionHistoryEntry[]>([]);
+  const [isStorageHydrated, setIsStorageHydrated] = useState(false);
   const alarmRef = useRef<HTMLAudioElement | null>(null);
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -102,6 +135,14 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       setSeconds(settings.focus * 60);
     }
   }, [state]);
+
+  const setTask = useCallback((nextTask: string) => {
+    setTaskState(nextTask.slice(0, 160));
+  }, []);
+
+  const clearSessionHistory = useCallback(() => {
+    setSessionHistory([]);
+  }, []);
 
   const startTimer = useCallback(() => {
     if (intervalRef.current) {
@@ -156,21 +197,47 @@ export function TimerProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const storedCustomPreset = window.localStorage.getItem(CUSTOM_PRESET_STORAGE_KEY);
-    if (!storedCustomPreset) return;
-
-    try {
-      const parsed = JSON.parse(storedCustomPreset);
-      if (isValidPresetSettings(parsed)) {
-        setCustomPresetState(parsed);
+    if (storedCustomPreset) {
+      try {
+        const parsed = JSON.parse(storedCustomPreset);
+        if (isValidPresetSettings(parsed)) {
+          setCustomPresetState(parsed);
+        }
+      } catch {
+        window.localStorage.removeItem(CUSTOM_PRESET_STORAGE_KEY);
       }
-    } catch {
-      window.localStorage.removeItem(CUSTOM_PRESET_STORAGE_KEY);
     }
+
+    const storedTask = window.localStorage.getItem(CURRENT_TASK_STORAGE_KEY);
+    if (storedTask) {
+      setTaskState(storedTask.slice(0, 160));
+    }
+
+    const storedHistory = window.localStorage.getItem(SESSION_HISTORY_STORAGE_KEY);
+    if (storedHistory) {
+      try {
+        const parsed = JSON.parse(storedHistory);
+        if (Array.isArray(parsed)) {
+          setSessionHistory(parsed.filter(isValidHistoryEntry).slice(0, MAX_HISTORY_ENTRIES));
+        }
+      } catch {
+        window.localStorage.removeItem(SESSION_HISTORY_STORAGE_KEY);
+      }
+    }
+
+    setIsStorageHydrated(true);
   }, []);
 
   useEffect(() => {
     window.localStorage.setItem(CUSTOM_PRESET_STORAGE_KEY, JSON.stringify(customPreset));
   }, [customPreset]);
+
+  useEffect(() => {
+    if (!isStorageHydrated) return;
+
+    window.localStorage.setItem(CURRENT_TASK_STORAGE_KEY, task);
+    window.localStorage.setItem(SESSION_HISTORY_STORAGE_KEY, JSON.stringify(sessionHistory));
+  }, [isStorageHydrated, sessionHistory, task]);
 
   useEffect(() => {
     if (seconds === 0) {
@@ -186,9 +253,26 @@ export function TimerProvider({ children }: { children: ReactNode }) {
         clearInterval(intervalRef.current);
       }
 
+      const presetSettings = getPresetSettings(preset);
+      const completedDuration = phase === 'focus'
+        ? presetSettings.focus
+        : session % 4 === 0
+          ? presetSettings.longBreak
+          : presetSettings.break;
+
+      setSessionHistory((history) => [
+        {
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          phase,
+          durationMinutes: completedDuration,
+          completedAt: new Date().toISOString(),
+          task: task.trim(),
+        },
+        ...history,
+      ].slice(0, MAX_HISTORY_ENTRIES));
+
       if (phase === 'focus') {
         setPhase('break');
-        const presetSettings = getPresetSettings(preset);
         const breakMinutes = session % 4 === 0 ? presetSettings.longBreak : presetSettings.break;
         setSeconds(breakMinutes * 60);
       } else {
@@ -199,7 +283,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       }
 
     } 
-  }, [seconds, phase, preset, getInitialTime, getPresetSettings, session, soundEnabled]);
+  }, [seconds, phase, preset, getInitialTime, getPresetSettings, session, soundEnabled, task]);
 
   useEffect(() => {
     return () => {
@@ -218,12 +302,16 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       session,
       preset,
       customPreset,
+      task,
+      sessionHistory,
       startTimer,
       pauseTimer,
       resumeTimer,
       stopTimer,
       setPreset,
-      setCustomPreset
+      setCustomPreset,
+      setTask,
+      clearSessionHistory,
     }}>
       {children}
 

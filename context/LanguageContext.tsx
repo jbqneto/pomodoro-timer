@@ -26,6 +26,15 @@ const translations = {
     pause: 'PAUSE',
     resume: 'RESUME',
     stop: 'STOP',
+    currentTask: 'Current task',
+    taskPlaceholder: 'What are you working on?',
+    sessionHistory: 'Session history',
+    completedSessions: 'Completed sessions',
+    expandHistory: 'Expand session history',
+    collapseHistory: 'Collapse session history',
+    clearHistory: 'Clear',
+    emptyHistory: 'Complete a focus or break session to see it here.',
+    minutesShort: 'min',
     
     // Presets
     classic: 'Classic 25/5',
@@ -112,6 +121,15 @@ const translations = {
     pause: 'PAUSAR',
     resume: 'RETOMAR',
     stop: 'PARAR',
+    currentTask: 'Tarefa atual',
+    taskPlaceholder: 'Em que você está trabalhando?',
+    sessionHistory: 'Histórico de sessões',
+    completedSessions: 'Sessões concluídas',
+    expandHistory: 'Expandir histórico de sessões',
+    collapseHistory: 'Recolher histórico de sessões',
+    clearHistory: 'Limpar',
+    emptyHistory: 'Conclua uma sessão de foco ou pausa para vê-la aqui.',
+    minutesShort: 'min',
     
     // Presets
     classic: 'Clássico 25/5',
