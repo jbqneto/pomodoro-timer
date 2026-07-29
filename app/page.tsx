@@ -10,13 +10,17 @@ import TimerCard from "@/components/timer/TimerCard";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/context/LanguageContext";
 import { Button } from "@/components/ui/button";
+import { SessionHistorySidebar } from "@/components/timer/SessionHistorySidebar";
+import { useState } from "react";
 
 function HomeContent() {
   const { t } = useLanguage();
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   return (
-    <main className="min-h-dvh bg-neutral-950 text-neutral-100">
-      <Header />
+    <>
+      <main className={`min-h-screen bg-neutral-950 text-neutral-100 transition-[padding] duration-300 ${historyOpen ? "md:pr-80" : "md:pr-[3.75rem]"}`}>
+      <Header onOpenHistory={() => setHistoryOpen(true)} />
       <section className="mx-auto mt-6 max-w-5xl px-4 space-y-6">
         <section className="px-1 py-2">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-400">{t('heroEyebrow')}</p>
@@ -30,6 +34,8 @@ function HomeContent() {
       </section>
       <Footer />
     </main>
+      <SessionHistorySidebar open={historyOpen} onOpenChange={setHistoryOpen} />
+    </>
   );
 
   /**

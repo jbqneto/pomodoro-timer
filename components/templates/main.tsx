@@ -14,7 +14,7 @@ export default function MainTemplate({ children }: { children: ReactNode }) {
         <ThemeProvider>
       <LanguageProvider>
         <ConfigProvider>
-          <main className="min-h-dvh bg-neutral-950 text-neutral-100">
+          <main className="min-h-screen bg-neutral-950 text-neutral-100">
             <Header />
             <section className="mx-auto mt-6 max-w-3xl px-4 space-y-6">
               {children}
