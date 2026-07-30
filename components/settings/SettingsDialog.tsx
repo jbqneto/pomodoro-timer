@@ -1,9 +1,16 @@
 "use client";
 
 import { useConfig } from "@/context/ConfigContext";
-import { useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { PresetSelector } from "../PresetSelector";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 type Props = { open: boolean; onClose: () => void };
 
@@ -11,18 +18,13 @@ export default function SettingsDialog({ open, onClose }: Props) {
   const { t } = useLanguage();
   const { soundEnabled, setSoundEnabled, soundVolume, setSoundVolume, musicVolume, setMusicVolume, autoPlay:autoPlayMusic, setAutoPlay:setAutoPlayMusic, showBreakTips, setShowBreakTips } = useConfig();
 
-  useEffect(() => {
-    function onEsc(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
-    if (open) window.addEventListener("keydown", onEsc);
-    return () => window.removeEventListener("keydown", onEsc);
-  }, [open, onClose]);
-
-  if (!open) return null;
-
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4">
-      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-neutral-900 p-6 shadow-xl">
-        <h2 className="mb-4 text-lg font-semibold">{t('settings')}</h2>
+    <Dialog open={open} onOpenChange={(nextOpen) => { if (!nextOpen) onClose(); }}>
+      <DialogContent className="max-h-[85dvh] w-[calc(100vw-2rem)] max-w-2xl overflow-x-hidden overflow-y-auto rounded-2xl border-white/10 bg-neutral-900 p-6 text-neutral-100 shadow-xl">
+        <DialogHeader>
+          <DialogTitle>{t('settings')}</DialogTitle>
+          <DialogDescription className="text-neutral-400">{t('settingsDescription')}</DialogDescription>
+        </DialogHeader>
 
         <div className="space-y-5">
           <div>
@@ -70,10 +72,12 @@ export default function SettingsDialog({ open, onClose }: Props) {
           </div>
         </div>
 
-        <button className="mt-6 w-full rounded-xl bg-sky-500 px-4 py-2 font-semibold text-white hover:bg-sky-400" onClick={onClose}>
-          {t('close')}
-        </button>
-      </div>
-    </div>
+        <DialogClose asChild>
+          <button className="mt-2 w-full rounded-xl bg-sky-500 px-4 py-2 font-semibold text-white hover:bg-sky-400">
+            {t('close')}
+          </button>
+        </DialogClose>
+      </DialogContent>
+    </Dialog>
   );
 }

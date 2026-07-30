@@ -1,7 +1,7 @@
 "use client"
 
 import { useLanguage } from "@/context/LanguageContext";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import SettingsDialog from "./settings/SettingsDialog";
 import Link from "next/link";
 import { History } from "lucide-react";
@@ -14,6 +14,17 @@ export default function Header({ onOpenHistory }: HeaderProps) {
   const { t,language, setLanguage } = useLanguage();
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const settingsOpener = useRef<HTMLButtonElement | null>(null);
+
+  const openSettings = (event: React.MouseEvent<HTMLButtonElement>) => {
+    settingsOpener.current = event.currentTarget;
+    setOpen(true);
+  };
+
+  const closeSettings = () => {
+    setOpen(false);
+    queueMicrotask(() => settingsOpener.current?.focus());
+  };
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-neutral-950/75 backdrop-blur">
@@ -27,7 +38,6 @@ export default function Header({ onOpenHistory }: HeaderProps) {
         <nav className="hidden items-center gap-4 md:flex">
           <Link className="text-sm text-neutral-300 hover:text-white" href="/">{t('home')}</Link>
           <Link className="text-sm text-neutral-300 hover:text-white" href="/about">{ t('about') }</Link>
-          <a className="text-sm text-neutral-300 hover:text-white" href="#android-app">{t('androidApp')}</a>
 
           {/* Lang switch */}
           <div className="ml-2 inline-flex overflow-hidden rounded-full border border-white/10">
@@ -51,7 +61,7 @@ export default function Header({ onOpenHistory }: HeaderProps) {
           <button
             className="rounded-full p-2 text-neutral-400 hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-500/30"
             aria-label={t('settings')}
-            onClick={() => setOpen(true)}
+            onClick={openSettings}
           >
             ⚙
           </button>
@@ -73,7 +83,6 @@ export default function Header({ onOpenHistory }: HeaderProps) {
           <div className="mx-auto flex max-w-5xl flex-col gap-2 px-4 py-3">
             <Link className="text-sm text-neutral-200" href="/" onClick={()=>setMenuOpen(false)}>{t('home')}</Link>
             <Link className="text-sm text-neutral-200" href="/about" onClick={()=>setMenuOpen(false)}>{t('about')}</Link>
-            <a className="text-sm text-neutral-200" href="#android-app" onClick={()=>setMenuOpen(false)}>{t('androidApp')}</a>
 
             {onOpenHistory && (
               <button
@@ -98,13 +107,13 @@ export default function Header({ onOpenHistory }: HeaderProps) {
             </div>
 
             <div className="flex items-center justify-end">
-              <button className="rounded-full p-2 text-neutral-400 hover:bg-white/5" aria-label={t('settings')} onClick={()=>setOpen(true)}>⚙</button>
+              <button className="rounded-full p-2 text-neutral-400 hover:bg-white/5" aria-label={t('settings')} onClick={openSettings}>⚙</button>
             </div>
           </div>
         </div>
       )}
 
-      <SettingsDialog open={open} onClose={()=>setOpen(false)} />
+      <SettingsDialog open={open} onClose={closeSettings} />
     </header>
   );
 }

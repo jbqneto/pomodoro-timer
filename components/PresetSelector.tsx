@@ -24,7 +24,7 @@ export function PresetSelector() {
   }
 
   const presetButtonClass = (presetId: '25/5' | '15' | 'custom') =>
-    `w-full justify-center rounded-lg px-4 py-2 text-sm font-medium transition-all focus-ring sm:w-auto ${
+    `h-10 w-full justify-center rounded-lg px-4 py-2 text-sm font-medium transition-all focus-ring ${
       preset === presetId
         ? 'bg-primary text-primary-foreground hover:bg-primary/90'
         : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
@@ -32,7 +32,7 @@ export function PresetSelector() {
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-1 gap-2 sm:flex">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         <Button
           onClick={() => handlePresetChange('25/5')}
           variant={preset === '25/5' ? 'default' : 'secondary'}
@@ -65,7 +65,7 @@ export function PresetSelector() {
       </div>
 
       {preset === 'custom' && (
-        <fieldset disabled={!isIdle} className="grid grid-cols-3 gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+        <fieldset disabled={!isIdle} className="grid grid-cols-1 gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3 sm:grid-cols-3">
           <label className="min-w-0 text-xs font-medium text-neutral-300">
             {t('focusDuration')}
             <input

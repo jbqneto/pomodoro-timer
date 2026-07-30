@@ -70,14 +70,15 @@ export const ptMessages = {
     
     // Footer
     disclaimer: 'Feito para trabalho focado com sessões temporizadas e música de fundo.',
+    androidFooterNotice: 'Uma versão para Android está planejada para o futuro.',
     
     // Header
     home: 'Início',
     language: 'Idioma',
     about: 'Sobre',
     contact: 'Contato',
-    androidApp: 'App Android',
     settings: 'Configurações',
+    settingsDescription: 'Configure presets do timer, dicas de pausa, alarmes e preferências de música.',
     close: 'Fechar',
 
     // Ad
@@ -87,11 +88,6 @@ export const ptMessages = {
     heroEyebrow: 'Foque mais rápido com música',
     heroTitle: 'Um timer, a música certa e foco de verdade.',
     heroDescription: 'Inicie uma sessão de foco em segundos com playlists clássicas, lo-fi ou gregorianas.',
-    androidBadge: 'Quer algo mais completo?',
-    androidTitle: 'A experiência completa de foco está chegando ao Android.',
-    androidDescription: 'Objetivos, sessões guiadas, lembretes e insights pessoais ficarão no app mobile. A versão web continua rápida e simples.',
-    androidCta: 'App Android em breve',
-
     // Settings
     alarm: 'Alarme',
     volume: 'Volume',
