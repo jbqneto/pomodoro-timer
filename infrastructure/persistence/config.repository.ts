@@ -10,6 +10,7 @@ export type PersistedConfig = {
   musicVolume: number;
   showBreakTips: boolean;
   interfaceMode: InterfaceMode;
+  askForOccasionalFeedback?: boolean;
 };
 
 export interface ConfigRepository {
