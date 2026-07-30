@@ -61,7 +61,7 @@ describe('LanguageContext', () => {
       'focus', 'break', 'session', 'timeToFocus', 'timeForBreak',
       'start', 'pause', 'resume', 'stop',
       'classic', 'quick', 'timerPreset',
-      'lofi', 'classical', 'catholic',
+      'lofi', 'classical', 'silence', 'gregorian',
       'home', 'about', 'settings', 'close',
       'alarm', 'volume', 'startMusicWithTimer',
       'disclaimer', 'heroTitle', 'heroDescription',

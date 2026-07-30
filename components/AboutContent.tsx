@@ -31,7 +31,7 @@ export default function AboutContent() {
         </article>
 
         <article>
-          <h3>{t('catholic')}</h3>
+          <h3>{t('gregorian')}</h3>
           <p>{t('gregorianDescription')}</p>
         </article>
       </section>

@@ -1,8 +1,5 @@
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
-
-const inter = Inter({ subsets: ['latin'] });
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -40,7 +37,7 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/imgs/favico.ico" />
       </head>
-      <body className={inter.className}>
+      <body className="font-sans antialiased">
         {children}
       </body>
     </html>

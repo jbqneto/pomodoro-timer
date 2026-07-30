@@ -1,74 +1,32 @@
 "use client";
 
 import { useConfig } from "@/context/ConfigContext";
-import { useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { PresetSelector } from "../PresetSelector";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { useEffect, useRef } from "react";
 
 type Props = { open: boolean; onClose: () => void };
 
 export default function SettingsDialog({ open, onClose }: Props) {
   const { t } = useLanguage();
-  const { soundEnabled, setSoundEnabled, soundVolume, setSoundVolume, musicVolume, setMusicVolume, autoPlay:autoPlayMusic, setAutoPlay:setAutoPlayMusic } = useConfig();
-
+  const { soundEnabled, setSoundEnabled, soundVolume, setSoundVolume, musicVolume, setMusicVolume, autoPlay, setAutoPlay, activePlaylist } = useConfig();
+  const silent = activePlaylist === "silence";
+  const openerRef = useRef<HTMLElement | null>(null);
   useEffect(() => {
-    function onEsc(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
-    if (open) window.addEventListener("keydown", onEsc);
-    return () => window.removeEventListener("keydown", onEsc);
-  }, [open, onClose]);
-
-  if (!open) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4">
-      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-neutral-900 p-6 shadow-xl">
-        <h2 className="mb-4 text-lg font-semibold">{t('settings')}</h2>
-
-        <div className="space-y-5">
-          <div>
-            <label className="mb-2 block text-sm font-medium text-neutral-300">{t('timerPreset')}</label>
-            <PresetSelector />
-          </div>
-
-          <label className="flex items-center justify-between gap-4">
-            <span>🔔 {t('alarm')}</span>
-            <input type="checkbox" checked={soundEnabled} onChange={(e) => setSoundEnabled(e.target.checked)} />
-          </label>
-
-          <div className={`${soundEnabled ? "opacity-100" : "opacity-50 pointer-events-none"}`}>
-            <label className="mb-1 block text-sm text-neutral-300">{t('alarmVolume')}</label>
-            <input
-              type="range"
-              min={0}
-              max={100}
-              value={soundVolume}
-              onChange={(e) => setSoundVolume(Number(e.target.value))}
-              className="h-1 w-full appearance-none rounded bg-white/10 accent-sky-400"
-            />
-          </div>
-
-          <label className="flex items-center justify-between gap-4">
-            <span>🎵 {t('startMusicWithTimer')}</span>
-            <input type="checkbox" checked={autoPlayMusic} onChange={(e) => setAutoPlayMusic(e.target.checked)} />
-          </label>
-
-          <div>
-            <label className="mb-1 block text-sm text-neutral-300">{t('musicVolume')}</label>
-            <input
-              type="range"
-              min={0}
-              max={100}
-              value={musicVolume}
-              onChange={(e) => setMusicVolume(Number(e.target.value))}
-              className="h-1 w-full appearance-none rounded bg-white/10 accent-sky-400"
-            />
-          </div>
-        </div>
-
-        <button className="mt-6 w-full rounded-xl bg-sky-500 px-4 py-2 font-semibold text-white hover:bg-sky-400" onClick={onClose}>
-          {t('close')}
-        </button>
+    if (open) openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  }, [open]);
+  return <Dialog open={open} onOpenChange={(next) => { if (!next) onClose(); }}>
+    <DialogContent onCloseAutoFocus={(event) => { event.preventDefault(); openerRef.current?.focus(); }} className="w-[calc(100%-2rem)] max-w-sm rounded-2xl border-white/10 bg-neutral-900 text-neutral-100" aria-describedby="settings-description">
+      <DialogTitle>{t("settings")}</DialogTitle>
+      <DialogDescription id="settings-description" className="text-neutral-400">{t("settingsDescription")}</DialogDescription>
+      <div className="space-y-5">
+        <div><label className="mb-2 block text-sm font-medium text-neutral-300">{t("timerPreset")}</label><PresetSelector /></div>
+        <label className="flex items-center justify-between gap-4"><span>🔔 {t("alarm")}</span><input type="checkbox" checked={soundEnabled} onChange={(event) => setSoundEnabled(event.target.checked)} /></label>
+        <div className={soundEnabled ? "" : "pointer-events-none opacity-50"}><label htmlFor="alarm-volume" className="mb-1 block text-sm text-neutral-300">{t("alarmVolume")}</label><input id="alarm-volume" type="range" min={0} max={100} value={soundVolume} onChange={(event) => setSoundVolume(Number(event.target.value))} className="h-1 w-full accent-sky-400" /></div>
+        <label className={`flex items-center justify-between gap-4 ${silent ? "opacity-50" : ""}`}><span>🎵 {t("startMusicWithTimer")}</span><input type="checkbox" checked={autoPlay} disabled={silent} onChange={(event) => setAutoPlay(event.target.checked)} /></label>
+        <div className={silent ? "pointer-events-none opacity-50" : ""}><label htmlFor="music-volume" className="mb-1 block text-sm text-neutral-300">{t("musicVolume")}</label><input id="music-volume" type="range" min={0} max={100} disabled={silent} value={musicVolume} onChange={(event) => setMusicVolume(Number(event.target.value))} className="h-1 w-full accent-sky-400" /></div>
       </div>
-    </div>
-  );
+    </DialogContent>
+  </Dialog>;
 }

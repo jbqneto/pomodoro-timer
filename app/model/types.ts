@@ -1,1 +1,1 @@
-type PlaylistType = 'lofi' | 'classical' | 'catholic';
+export type { PlaylistType } from "@/context/ConfigContext";
