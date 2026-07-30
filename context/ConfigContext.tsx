@@ -1,108 +1,40 @@
 "use client";
 
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { MusicOptionId } from '@/core/music/music.types';
+import { ConfigRepository, PersistedConfig } from '@/infrastructure/persistence/config.repository';
+import { defaultConfigRepository } from '@/infrastructure/persistence/local-storage-config.repository';
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
-const playlists = {
-  lofi: 'PLgRDBI6ZEX_yqpTYSAgshj_vjoaMs0GP8', // Lo-fi study playlist
-  classical: 'PLgRDBI6ZEX_ztab0cICj_wIqo1GHjtzDd', // Classical study playlist
-  catholic: 'PLgRDBI6ZEX_zsw_JKMy_lEyXvvNENoEyr' // Catholic hymns playlist
+const DEFAULT_CONFIG: PersistedConfig = {
+  activePlaylist: 'gregorian', soundEnabled: true, autoPlay: true, soundVolume: 80, musicVolume: 80,
 };
-
-interface ConfigContextType {
-  soundEnabled: boolean;
-  autoPlay: boolean;
-  activePlaylist: PlaylistType | null;
-  soundVolume: number;
-  musicVolume: number;
-  setAutoPlay: (enabled: boolean) => void;
-  setSoundVolume: (volume: number) => void;
-  setMusicVolume: (volume: number) => void;
-  setActivePlaylist: (playlist: PlaylistType | null) => void;
-  setSoundEnabled: (enabled: boolean) => void;
-  getPlaylistId: (playlist: PlaylistType) => string;
+interface ConfigContextType extends PersistedConfig {
+  setAutoPlay(value: boolean): void;
+  setSoundVolume(value: number): void;
+  setMusicVolume(value: number): void;
+  setActivePlaylist(value: MusicOptionId): void;
+  setSoundEnabled(value: boolean): void;
 }
-
 const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
-const STORAGE_KEY = "focus-timer-config";
 
-export function ConfigProvider({ children }: { children: ReactNode }) {
-  const [activePlaylist, setActivePlaylist] = useState<PlaylistType | null>('catholic');
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [autoPlay, setAutoPlay] = useState(true);
-  const [soundVolume, setSoundVolume] = useState(80);
-  const [musicVolume, setMusicVolume] = useState(80);
-
-  const getPlaylistId = (playlist: PlaylistType) => {
-    return playlists[playlist];
-  };
-
+export function ConfigProvider({ children, repository = defaultConfigRepository }: { children: ReactNode; repository?: ConfigRepository }) {
+  const [config, setConfig] = useState(DEFAULT_CONFIG);
+  const [hydrated, setHydrated] = useState(false);
   useEffect(() => {
-    const storedConfig = window.localStorage.getItem(STORAGE_KEY);
-    if (!storedConfig) return;
-
-    try {
-      const parsed = JSON.parse(storedConfig) as Partial<ConfigContextType>;
-
-      if (typeof parsed.soundEnabled === "boolean") {
-        setSoundEnabled(parsed.soundEnabled);
-      }
-
-      if (typeof parsed.autoPlay === "boolean") {
-        setAutoPlay(parsed.autoPlay);
-      }
-
-      if (typeof parsed.soundVolume === "number") {
-        setSoundVolume(parsed.soundVolume);
-      }
-
-      if (typeof parsed.musicVolume === "number") {
-        setMusicVolume(parsed.musicVolume);
-      }
-
-      if (parsed.activePlaylist === null || parsed.activePlaylist === "lofi" || parsed.activePlaylist === "classical" || parsed.activePlaylist === "catholic") {
-        setActivePlaylist(parsed.activePlaylist);
-      }
-    } catch {
-      window.localStorage.removeItem(STORAGE_KEY);
-    }
-  }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({
-        activePlaylist,
-        soundEnabled,
-        autoPlay,
-        soundVolume,
-        musicVolume,
-      }),
-    );
-  }, [activePlaylist, soundEnabled, autoPlay, soundVolume, musicVolume]);
-  
-  return (
-    <ConfigContext.Provider value={{
-      soundEnabled,
-      activePlaylist,
-      autoPlay,
-      soundVolume,
-      musicVolume,
-      setAutoPlay,
-      setSoundVolume,
-      setMusicVolume,
-      setActivePlaylist,
-      setSoundEnabled,
-      getPlaylistId
-    }}>
-      {children}
-    </ConfigContext.Provider>
-  );
+    const stored = repository.load();
+    if (stored) setConfig(stored);
+    setHydrated(true);
+  }, [repository]);
+  useEffect(() => { if (hydrated) repository.save(config); }, [config, hydrated, repository]);
+  const update = <K extends keyof PersistedConfig>(key: K, value: PersistedConfig[K]) => setConfig((current) => ({ ...current, [key]: value }));
+  return <ConfigContext.Provider value={{ ...config,
+    setAutoPlay: (value) => update('autoPlay', value), setSoundVolume: (value) => update('soundVolume', value),
+    setMusicVolume: (value) => update('musicVolume', value), setActivePlaylist: (value) => update('activePlaylist', value),
+    setSoundEnabled: (value) => update('soundEnabled', value),
+  }}>{children}</ConfigContext.Provider>;
 }
-
 export function useConfig() {
   const context = useContext(ConfigContext);
-  if (!context) {
-    throw new Error("useConfig must be used within a ConfigProvider");
-  }
+  if (!context) throw new Error('useConfig must be used within a ConfigProvider');
   return context;
 }

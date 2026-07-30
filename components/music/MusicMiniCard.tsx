@@ -4,15 +4,19 @@ import { ChangeEvent, useEffect, useRef, useState } from "react";
 import YouTubePlayer, { YoutubePlayerRef } from "../YouTubePlayer";
 import { useLanguage } from "@/context/LanguageContext";
 import { useConfig } from "@/context/ConfigContext";
+import { useTimer } from "@/context/TimerContext";
+import { getMusicOptions, getMusicSource } from "@/core/music/music.catalog";
+import { MusicOptionId } from "@/core/music/music.types";
 import { ChevronDown, Music4, Pause, Play, SkipBack, SkipForward, Volume2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 const YOUTUBE_CONSENT_KEY = "youtube-media-consent";
-const PLAYLIST_OPTIONS: PlaylistType[] = ["catholic", "lofi", "classical"];
+const MUSIC_OPTIONS = getMusicOptions();
 
 export default function MusicMiniCard() {
   const { t } = useLanguage();
-  const { activePlaylist, musicVolume, setActivePlaylist, setMusicVolume } = useConfig();
+  const { activePlaylist, musicVolume, autoPlay, setActivePlaylist, setMusicVolume } = useConfig();
+  const { state: timerState } = useTimer();
   const playerRef = useRef<YoutubePlayerRef>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [consent, setConsent] = useState<"granted" | "denied" | null>(null);
@@ -23,7 +27,7 @@ export default function MusicMiniCard() {
   }
 
   function handlePlaylistChange(event: ChangeEvent<HTMLSelectElement>): void {
-    setActivePlaylist(event.target.value as PlaylistType);
+    setActivePlaylist(event.target.value as MusicOptionId);
     setIsPlaying(false);
   }
 
@@ -32,12 +36,7 @@ export default function MusicMiniCard() {
   }, [musicVolume]);
 
   useEffect(() => {
-    if (activePlaylist === null) {
-      setActivePlaylist("catholic");
-    }
-  }, [activePlaylist, setActivePlaylist]);
-
-  useEffect(() => {
+    if (getMusicSource(activePlaylist).type === 'silence') return;
     const storedConsent = window.localStorage.getItem(YOUTUBE_CONSENT_KEY);
 
     if (storedConsent === "granted" || storedConsent === "denied") {
@@ -46,7 +45,7 @@ export default function MusicMiniCard() {
     }
 
     setShowConsentModal(true);
-  }, []);
+  }, [activePlaylist]);
 
   function togglePlayback() {
     if (!playerRef.current || consent !== "granted") return;
@@ -81,7 +80,9 @@ export default function MusicMiniCard() {
     }
   }
 
-  const selectedPlaylist = activePlaylist ?? "catholic";
+  const selectedSource = getMusicSource(activePlaylist);
+  const hasYouTubeSource = selectedSource.type === 'youtube-playlist';
+  const controlsDisabled = !hasYouTubeSource || consent !== 'granted';
 
   return (
     <TooltipProvider delayDuration={120}>
@@ -98,13 +99,13 @@ export default function MusicMiniCard() {
             <div className="group relative rounded-2xl bg-gradient-to-b from-white/[0.08] to-white/[0.02] p-px shadow-[0_14px_32px_-22px_rgba(56,189,248,0.8)]">
               <select
                 id="music-category"
-                value={selectedPlaylist}
+                value={activePlaylist}
                 onChange={handlePlaylistChange}
                 className="h-11 w-full appearance-none rounded-[15px] border border-white/10 bg-neutral-950/90 px-4 pr-11 text-sm font-semibold text-neutral-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.07)] outline-none transition-all duration-200 hover:border-sky-300/35 hover:bg-neutral-950 focus:border-sky-300/70 focus:ring-2 focus:ring-sky-400/35"
               >
-                {PLAYLIST_OPTIONS.map((playlist) => (
-                  <option key={playlist} value={playlist} className="bg-neutral-950 text-neutral-100">
-                    {t(playlist)}
+                {MUSIC_OPTIONS.map((option) => (
+                  <option key={option.id} value={option.id} className="bg-neutral-950 text-neutral-100">
+                    {t(option.id)}
                   </option>
                 ))}
               </select>
@@ -117,8 +118,11 @@ export default function MusicMiniCard() {
         </div>
 
         <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black/35 shadow-[0_18px_38px_-28px_rgba(14,165,233,0.65)]">
-          {consent === "granted" ? (
-            <YouTubePlayer ref={playerRef} onPlaybackStateChange={setIsPlaying} />
+          {!hasYouTubeSource ? (
+            <div className="aspect-video" />
+          ) : consent === "granted" ? (
+            <YouTubePlayer ref={playerRef} playlistId={selectedSource.playlistId} volume={musicVolume}
+              shouldPlay={timerState === 'running' && autoPlay} onPlaybackStateChange={setIsPlaying} />
           ) : (
             <div className="flex aspect-video flex-col items-center justify-center gap-4 px-6 text-center">
               <p className="max-w-xs text-sm leading-6 text-neutral-300">
@@ -143,7 +147,7 @@ export default function MusicMiniCard() {
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-neutral-100 transition-all duration-200 hover:-translate-y-px hover:bg-white/10 focus-ring disabled:cursor-not-allowed disabled:text-neutral-500 disabled:hover:translate-y-0 disabled:hover:bg-white/5"
                 onClick={playPreviousTrack}
                 aria-label={t("previousTrack")}
-                disabled={consent !== "granted"}
+                disabled={controlsDisabled}
               >
                 <SkipBack className="h-4 w-4" />
               </button>
@@ -160,7 +164,7 @@ export default function MusicMiniCard() {
                 onClick={togglePlayback}
                 aria-pressed={isPlaying}
                 aria-label={isPlaying ? t("pauseVideo") : t("playVideo")}
-                disabled={consent !== "granted"}
+                disabled={controlsDisabled}
               >
                 {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="ml-0.5 h-4 w-4" />}
               </button>
@@ -177,7 +181,7 @@ export default function MusicMiniCard() {
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-neutral-100 transition-all duration-200 hover:-translate-y-px hover:bg-white/10 focus-ring disabled:cursor-not-allowed disabled:text-neutral-500 disabled:hover:translate-y-0 disabled:hover:bg-white/5"
                 onClick={playNextTrack}
                 aria-label={t("nextTrack")}
-                disabled={consent !== "granted"}
+                disabled={controlsDisabled}
               >
                 <SkipForward className="h-4 w-4" />
               </button>
@@ -213,7 +217,7 @@ export default function MusicMiniCard() {
 
       </section>
 
-      {showConsentModal && (
+      {hasYouTubeSource && showConsentModal && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4">
           <div className="w-full max-w-md rounded-3xl border border-white/10 bg-neutral-900 p-6 shadow-[0_24px_70px_-28px_rgba(0,0,0,0.7)]">
             <div className="flex items-center gap-3">

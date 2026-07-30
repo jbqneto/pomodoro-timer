@@ -19,7 +19,7 @@ describe('ConfigContext', () => {
     expect(result.current.soundEnabled).toBe(true)
     expect(result.current.autoPlay).toBe(true)
     expect(result.current.soundVolume).toBe(80)
-    expect(result.current.activePlaylist).toBe('catholic')
+    expect(result.current.activePlaylist).toBe('gregorian')
   })
 
   it('loads persisted settings from localStorage on mount', async () => {
@@ -76,14 +76,8 @@ describe('ConfigContext', () => {
     const { result } = renderHook(() => useConfig(), { wrapper })
 
     await waitFor(() => {
-      expect(result.current.activePlaylist).toBe('catholic')
+      expect(result.current.activePlaylist).toBe('gregorian')
     })
   })
 
-  it('returns a valid playlist ID for each playlist', () => {
-    const { result } = renderHook(() => useConfig(), { wrapper })
-    expect(result.current.getPlaylistId('lofi')).toBeTruthy()
-    expect(result.current.getPlaylistId('classical')).toBeTruthy()
-    expect(result.current.getPlaylistId('catholic')).toBeTruthy()
-  })
 })
