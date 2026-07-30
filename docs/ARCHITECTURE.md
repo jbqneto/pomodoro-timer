@@ -8,32 +8,28 @@ The application is a small Next.js **modular monolith**: it is delivered as one 
 
 ## Current architecture
 
-The following describes the repository today, not a completed target architecture.
+The following describes the repository after the core-boundary refactor.
 
 - **React presentation:** App Router pages compose the home and About experiences. Components render the timer, controls, preset selector, task input, session-history sidebar, settings, music card, dialogs, and shared UI primitives.
 - **React contexts:** `TimerContext` exposes timer and task/history state and commands; `ConfigContext` owns alarm/music preferences and playlist selection; `LanguageContext` owns language selection and translation lookup. The providers are composed around the home page. Other page templates compose the providers they require.
-- **Timer orchestration and rules:** `TimerContext` currently implements the interval, countdown state, fixed/custom preset rules, phase changes, every-fourth-session long break, control behavior, alarm triggering, and completed-session recording. Timer types, validation, and calculations live in the same file.
-- **Local persistence:** contexts read and write `localStorage` for configuration, language, custom presets, current task and lock state, and dated session history. The music card separately persists YouTube media consent. Reads validate some stored values and remove malformed JSON or invalid history/preset data.
-- **Music catalog and playback:** playlist keys and YouTube playlist IDs are defined in `ConfigContext`. `MusicMiniCard` presents selection and playback controls and handles consent. `YouTubePlayer` loads and controls the YouTube IFrame API and reacts to timer/configuration state. A separate `YoutubeConsentPlayer` component also contains an embed-based consent flow, although the main music card uses `YouTubePlayer`.
-- **Translations:** all English and Portuguese messages and the translation lookup function currently live in `LanguageContext` alongside language persistence and the document-language update.
-- **Tests:** Vitest runs in jsdom with React Testing Library. Existing suites exercise observable behavior of the three contexts, including timer transitions, persistence, validation, corrupt storage, language selection, tasks, and history. There are not yet separate tests for pure timer rules or a music adapter because those modules do not yet exist.
+- **Timer orchestration and rules:** `TimerContext` owns React state, deadline/interval orchestration, alarm triggering, and completed-session recording. Pure types, presets, deadline calculations, phase transitions, restart, and abandon rules live in `core/timer`.
+- **Local persistence:** synchronous configuration and timer-storage contracts have focused `localStorage` adapters. Providers accept optional implementations for tests. Language and media consent remain small browser concerns at their respective UI boundaries.
+- **Music catalog and playback:** `core/music` defines product options and official sources. `MusicMiniCard` resolves a source and coordinates consent and timer autoplay, while `YouTubePlayer` receives explicit playlist, volume, and playback props and owns only YouTube infrastructure behavior.
+- **Translations:** English and Portuguese message dictionaries live in `i18n`; `LanguageContext` owns only language hydration, persistence, document language, and lookup.
+- **Tests:** Vitest runs in jsdom with React Testing Library. Context suites cover orchestration while focused suites cover pure timer rules, catalogs, translation parity, and concrete storage adapters.
 - **External browser APIs:** the current code directly uses timers, `Date`, `HTMLAudioElement`, `window`, `document`, `localStorage`, dynamic script loading, and the global YouTube API. These dependencies are appropriate browser capabilities, but several are close to orchestration or presentation code.
 
 This structure was reasonable for the application's original scope. As capabilities accumulated, a few modules began coordinating multiple responsibilities. The direction below improves those seams incrementally rather than replacing the working architecture wholesale.
 
-## Current coupling points
+## Remaining coupling points
 
 ### Timer context
 
-`TimerContext` currently coordinates timer state, interval-based countdown calculations, phase transitions, fixed and custom preset selection, long-break selection, alarm behavior, task state and locking, local persistence, and dated session history. It also contains timer and persistence validation helpers.
-
-Future work should first extract stable timer types, rules, and calculations as pure functions. The context can continue to orchestrate React state and effects while that happens; it does not need to be removed or replaced in one refactor.
+`TimerContext` intentionally remains the React orchestrator for timer, task/history UI state, alarm, browser timing, and phase completion. Deterministic rules and storage validation no longer live there.
 
 ### Configuration context
 
-`ConfigContext` currently combines configuration state, stored-value validation, playlist definitions/ID lookup, and `localStorage` persistence. It handles malformed JSON, but storage format concerns and catalog data remain coupled to the provider.
-
-Persistence and playlist catalog definitions may be extracted when doing so makes the code easier to test or change. A separate interface is not required merely to move a constant or pure validator.
+`ConfigContext` coordinates configuration state with a synchronous repository. Catalog IDs and persisted-value validation are separate.
 
 ### Music playback
 
@@ -196,10 +192,8 @@ The existing context tests remain valuable during extraction: they characterize 
 
 Only debt visible in the current repository is listed here:
 
-- Timer rules, interval orchestration, audio effects, tasks, validation, persistence, and session history remain together in `TimerContext`.
-- Direct `localStorage` access is spread across the three contexts and music consent UI rather than owned by focused storage modules.
-- Playlist catalog IDs and configuration state remain coupled in `ConfigContext`.
-- Complete translation message catalogs remain inside `LanguageContext`.
-- YouTube-specific global API loading and playback behavior remain in a React component, while consent and controls remain close to presentation; two consent-player approaches also exist in the component tree.
+- Timer/task/history orchestration remains intentionally cohesive in `TimerContext`; a future composition root could construct repositories centrally if a second application requires it.
+- Language and YouTube-consent keys remain local browser concerns rather than generic repositories.
+- YouTube API lifecycle remains in a focused React adapter because the IFrame player is inherently DOM-bound.
 
 These are incremental improvement opportunities, not reasons for a rewrite.
