@@ -197,3 +197,10 @@ Only debt visible in the current repository is listed here:
 - YouTube API lifecycle remains in a focused React adapter because the IFrame player is inherently DOM-bound.
 
 These are incremental improvement opportunities, not reasons for a rewrite.
+# Application composition
+
+`composition/create-free-app-services.ts` is the Free application's composition root. It selects the existing local configuration repository and timer storage, a `BrowserClock`, local engagement persistence, and either Noop or Vercel product analytics. `AppProviders` creates the service graph once and injects dependencies into the providers that consume them; there is no service locator.
+
+The `Clock`, typed `ProductAnalytics`, and synchronous `EngagementRepository` ports represent dependencies with useful alternate implementations in tests or production. Browser adapters live under `infrastructure/`. Product-event delivery is best-effort and defaults to Noop outside explicitly enabled production deployments.
+
+Return-gap and feedback-cadence rules are application concerns kept outside both React and the timer domain. The timer reports focus completion through one explicit callback; engagement persistence records only versioned local calendar dates.

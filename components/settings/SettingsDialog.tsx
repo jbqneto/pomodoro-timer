@@ -18,7 +18,7 @@ type Props = { open: boolean; onClose: () => void };
 
 export default function SettingsDialog({ open, onClose }: Props) {
   const { t } = useLanguage();
-  const { soundEnabled, setSoundEnabled, soundVolume, setSoundVolume, musicVolume, setMusicVolume, autoPlay:autoPlayMusic, setAutoPlay:setAutoPlayMusic, showBreakTips, setShowBreakTips, interfaceMode = 'advanced', setInterfaceMode } = useConfig();
+  const { soundEnabled, setSoundEnabled, soundVolume, setSoundVolume, musicVolume, setMusicVolume, autoPlay:autoPlayMusic, setAutoPlay:setAutoPlayMusic, showBreakTips, setShowBreakTips, interfaceMode = 'advanced', setInterfaceMode, askForOccasionalFeedback, setAskForOccasionalFeedback } = useConfig();
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => { if (!nextOpen) onClose(); }}>
@@ -63,6 +63,7 @@ export default function SettingsDialog({ open, onClose }: Props) {
             <span>{t('showBreakTips')}</span>
             <input type="checkbox" checked={showBreakTips} onChange={(e) => setShowBreakTips(e.target.checked)} />
           </label>
+          <label className="flex items-center justify-between gap-4"><span>{t('askForOccasionalFeedback')}</span><input type="checkbox" checked={askForOccasionalFeedback} onChange={(e)=>setAskForOccasionalFeedback(e.target.checked)} /></label>
 
           <label className="flex items-center justify-between gap-4">
             <span>🔔 {t('alarm')}</span>

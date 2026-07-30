@@ -7,11 +7,17 @@ import MusicMiniCard from "../music/MusicMiniCard";
 import { TaskInput } from "./TaskInput";
 import { BreakTip } from "./BreakTip";
 import { useConfig } from "@/context/ConfigContext";
+import { useFeedback } from '@/context/FeedbackContext';
+import { UsefulnessFeedback } from './UsefulnessFeedback';
+import { ProductAnalytics } from '@/application/ports/product-analytics';
+import { NoopProductAnalytics } from '@/infrastructure/analytics/noop-product-analytics';
+const fallbackAnalytics = new NoopProductAnalytics();
 
-export default function TimerCard() {
+export default function TimerCard({analytics=fallbackAnalytics}:{analytics?:ProductAnalytics}) {
   const { phase, session } = useTimer();
   const { showBreakTips, interfaceMode } = useConfig();
   const isFocus = phase === "focus";
+  const feedback = useFeedback();
 
   return (
     <section
@@ -40,7 +46,7 @@ export default function TimerCard() {
           </div>
 
           <div className="mx-auto mt-auto w-full max-w-md pt-4">
-            {!isFocus && showBreakTips ? <BreakTip sessionNumber={session} /> : <TaskInput />}
+            {!isFocus && feedback.visible ? <UsefulnessFeedback analytics={analytics} /> : !isFocus && showBreakTips ? <BreakTip sessionNumber={session} /> : <TaskInput />}
             <div className="mt-3">
               <Controls />
             </div>

@@ -1,0 +1,3 @@
+import { EngagementRepository } from '@/application/ports/engagement.repository';
+import { getReturnGap, shouldPromptUsefulnessFeedback } from './engagement-rules';
+export class EngagementService { constructor(public readonly repository:EngagementRepository){} completeFocus(date:string,feedbackEnabled=true){const state=this.repository.load(); if(state.lastFocusCompletionDate===date)return {gap:null,prompt:false}; const gap=state.lastFocusCompletionDate?getReturnGap(state.lastFocusCompletionDate,date):null; const prompt=feedbackEnabled&&shouldPromptUsefulnessFeedback(state,date); this.repository.save({...state,lastFocusCompletionDate:date,lastFeedbackPromptDate:prompt?date:state.lastFeedbackPromptDate}); return {gap,prompt};} }

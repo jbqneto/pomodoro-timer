@@ -1,0 +1,7 @@
+"use client";
+import { X } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
+import { useConfig } from '@/context/ConfigContext';
+import { useFeedback } from '@/context/FeedbackContext';
+import { ProductAnalytics } from '@/application/ports/product-analytics';
+export function UsefulnessFeedback({analytics}:{analytics:ProductAnalytics}){const {t}=useLanguage();const {interfaceMode,setAskForOccasionalFeedback}=useConfig();const {hide}=useFeedback();const respond=(response:'yes'|'partly'|'no')=>{try{analytics.track({name:'usefulness_feedback_submitted',properties:{response,interface_mode:interfaceMode}})}catch{}hide()};return <section aria-label={t('usefulnessQuestion')} className="relative rounded-xl border border-amber-200/20 bg-amber-200/[0.06] p-3 text-left"><button type="button" aria-label={t('dismissFeedback')} onClick={hide} className="absolute right-2 top-2 rounded p-1 text-neutral-400 hover:text-white"><X size={16}/></button><p className="pr-7 text-sm text-neutral-200">{t('usefulnessQuestion')}</p><div className="mt-2 grid grid-cols-3 gap-2">{([['yes','feedbackYes'],['partly','feedbackPartly'],['no','feedbackNo']] as const).map(([value,key])=><button type="button" key={value} onClick={()=>respond(value)} className="rounded-lg border border-white/10 px-2 py-1.5 text-xs hover:bg-white/10">{t(key)}</button>)}</div><button type="button" onClick={()=>{setAskForOccasionalFeedback(false);hide()}} className="mt-2 text-xs text-neutral-400 underline hover:text-neutral-200">{t('feedbackNever')}</button></section>}

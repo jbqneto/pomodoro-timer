@@ -1,9 +1,5 @@
 "use client";
 
-import { ThemeProvider } from "@/components/ThemeProvider";
-import { LanguageProvider } from "@/context/LanguageContext";
-import { TimerProvider } from "@/context/TimerContext";
-import { ConfigProvider } from "@/context/ConfigContext";
 import { Analytics } from "@vercel/analytics/next";
 import Header from "@/components/Header";
 import TimerCard from "@/components/timer/TimerCard";
@@ -12,6 +8,10 @@ import { useLanguage } from "@/context/LanguageContext";
 import { SessionHistorySidebar } from "@/components/timer/SessionHistorySidebar";
 import { useEffect, useState } from "react";
 import { useConfig } from "@/context/ConfigContext";
+import { AppProviders } from '@/composition/AppProviders';
+import { createFreeAppServices } from '@/composition/create-free-app-services';
+
+const services = createFreeAppServices();
 
 function HomeContent() {
   const { t } = useLanguage();
@@ -34,7 +34,7 @@ function HomeContent() {
               <h1 className="mt-2 text-sm leading-6 text-neutral-300">{t('heroTitle')}</h1>
             </section>
 
-            <TimerCard />
+            <TimerCard analytics={services.analytics} />
           </section>
         </main>
         <Footer />
@@ -46,15 +46,9 @@ function HomeContent() {
 
 export default function Home() {
   return (
-    <ThemeProvider>
-      <LanguageProvider>
-        <ConfigProvider>
-          <TimerProvider>
-            <HomeContent />
-          </TimerProvider>
-        </ConfigProvider>
-      </LanguageProvider>
+    <AppProviders services={services}>
+      <HomeContent />
       <Analytics />
-    </ThemeProvider>
+    </AppProviders>
   );
 }
