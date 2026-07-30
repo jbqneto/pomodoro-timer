@@ -5,6 +5,15 @@ export const enMessages = {
     session: 'Session #',
     timeToFocus: 'Time to focus!',
     timeForBreak: 'Time for a break!',
+    breakTipTitle: 'Break tip',
+    breakTipStand: 'Stand up and walk for a moment.',
+    breakTipEyes: 'Look away from the screen and focus on something farther away.',
+    breakTipStretch: 'Gently relax your shoulders, neck, wrists, and hands.',
+    breakTipWater: 'Take a moment to drink some water.',
+    breakTipBreathe: 'Take a few slow, comfortable breaths.',
+    breakTipPosture: 'Change position and release any unnecessary tension.',
+    breakTipScreenFree: 'Step away from the screen until the break ends.',
+    breakTipRest: 'Let your mind rest without starting another task.',
     
     // Controls
     start: 'START',
@@ -87,6 +96,7 @@ export const enMessages = {
     alarmVolume: 'Alarm volume',
     musicVolume: 'Music volume',
     startMusicWithTimer: 'Start music with timer',
+    showBreakTips: 'Show tips during breaks',
 
     // About
     aboutTitle: 'Why Focus Beat exists',

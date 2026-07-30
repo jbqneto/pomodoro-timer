@@ -10,4 +10,12 @@ describe('translation dictionaries', () => {
     expect(enMessages.expandHistory).toBe('Expand session history');
     expect(ptMessages.youtubeConsentTitle).toBe('Consentimento do player do YouTube');
   });
+  it('contain all break-tip copy in both languages', () => {
+    const keys = ['breakTipTitle', 'showBreakTips', 'breakTipStand', 'breakTipEyes', 'breakTipStretch', 'breakTipWater',
+      'breakTipBreathe', 'breakTipPosture', 'breakTipScreenFree', 'breakTipRest'] as const;
+    for (const key of keys) {
+      expect(enMessages[key]).toBeTruthy();
+      expect(ptMessages[key]).toBeTruthy();
+    }
+  });
 });

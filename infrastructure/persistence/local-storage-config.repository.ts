@@ -2,7 +2,7 @@ import { isMusicOptionId } from '@/core/music/music.catalog';
 import { ConfigRepository, PersistedConfig } from './config.repository';
 
 export const CONFIG_STORAGE_KEY = 'focus-timer-config';
-const DEFAULTS: PersistedConfig = { activePlaylist: 'gregorian', soundEnabled: true, autoPlay: true, soundVolume: 80, musicVolume: 80 };
+const DEFAULTS: PersistedConfig = { activePlaylist: 'gregorian', soundEnabled: true, autoPlay: true, soundVolume: 80, musicVolume: 80, showBreakTips: true };
 const isVolume = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 100;
 
 export class LocalStorageConfigRepository implements ConfigRepository {
@@ -23,7 +23,8 @@ export class LocalStorageConfigRepository implements ConfigRepository {
         soundEnabled: typeof value.soundEnabled === 'boolean' ? value.soundEnabled : DEFAULTS.soundEnabled,
         autoPlay: typeof value.autoPlay === 'boolean' ? value.autoPlay : DEFAULTS.autoPlay,
         soundVolume: isVolume(value.soundVolume) ? value.soundVolume : DEFAULTS.soundVolume,
-        musicVolume: isVolume(value.musicVolume) ? value.musicVolume : DEFAULTS.musicVolume };
+        musicVolume: isVolume(value.musicVolume) ? value.musicVolume : DEFAULTS.musicVolume,
+        showBreakTips: typeof value.showBreakTips === 'boolean' ? value.showBreakTips : DEFAULTS.showBreakTips };
     } catch {
       this.clear();
       return null;
