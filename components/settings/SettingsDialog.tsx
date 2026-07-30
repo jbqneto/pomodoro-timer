@@ -9,7 +9,7 @@ type Props = { open: boolean; onClose: () => void };
 
 export default function SettingsDialog({ open, onClose }: Props) {
   const { t } = useLanguage();
-  const { soundEnabled, setSoundEnabled, soundVolume, setSoundVolume, musicVolume, setMusicVolume, autoPlay:autoPlayMusic, setAutoPlay:setAutoPlayMusic } = useConfig();
+  const { soundEnabled, setSoundEnabled, soundVolume, setSoundVolume, musicVolume, setMusicVolume, autoPlay:autoPlayMusic, setAutoPlay:setAutoPlayMusic, showBreakTips, setShowBreakTips } = useConfig();
 
   useEffect(() => {
     function onEsc(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
@@ -29,6 +29,11 @@ export default function SettingsDialog({ open, onClose }: Props) {
             <label className="mb-2 block text-sm font-medium text-neutral-300">{t('timerPreset')}</label>
             <PresetSelector />
           </div>
+
+          <label className="flex items-center justify-between gap-4">
+            <span>{t('showBreakTips')}</span>
+            <input type="checkbox" checked={showBreakTips} onChange={(e) => setShowBreakTips(e.target.checked)} />
+          </label>
 
           <label className="flex items-center justify-between gap-4">
             <span>🔔 {t('alarm')}</span>

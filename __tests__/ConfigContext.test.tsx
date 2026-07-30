@@ -20,6 +20,7 @@ describe('ConfigContext', () => {
     expect(result.current.autoPlay).toBe(true)
     expect(result.current.soundVolume).toBe(80)
     expect(result.current.activePlaylist).toBe('gregorian')
+    expect(result.current.showBreakTips).toBe(true)
   })
 
   it('loads persisted settings from localStorage on mount', async () => {
@@ -28,6 +29,7 @@ describe('ConfigContext', () => {
       autoPlay: false,
       soundVolume: 50,
       activePlaylist: 'lofi',
+      showBreakTips: false,
     }))
 
     const { result } = renderHook(() => useConfig(), { wrapper })
@@ -36,6 +38,7 @@ describe('ConfigContext', () => {
       expect(result.current.soundEnabled).toBe(false)
       expect(result.current.soundVolume).toBe(50)
       expect(result.current.activePlaylist).toBe('lofi')
+      expect(result.current.showBreakTips).toBe(false)
     })
   })
 

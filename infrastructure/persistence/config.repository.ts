@@ -6,6 +6,7 @@ export type PersistedConfig = {
   autoPlay: boolean;
   soundVolume: number;
   musicVolume: number;
+  showBreakTips: boolean;
 };
 
 export interface ConfigRepository {

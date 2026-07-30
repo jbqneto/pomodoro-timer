@@ -5,9 +5,12 @@ import { Timer } from "../Timer";
 import { Controls } from "./Controls";
 import MusicMiniCard from "../music/MusicMiniCard";
 import { TaskInput } from "./TaskInput";
+import { BreakTip } from "./BreakTip";
+import { useConfig } from "@/context/ConfigContext";
 
 export default function TimerCard() {
-  const { phase } = useTimer();
+  const { phase, session } = useTimer();
+  const { showBreakTips } = useConfig();
   const isFocus = phase === "focus";
 
   return (
@@ -37,7 +40,7 @@ export default function TimerCard() {
           </div>
 
           <div className="mx-auto mt-auto w-full max-w-md pt-4">
-            <TaskInput />
+            {!isFocus && showBreakTips ? <BreakTip sessionNumber={session} /> : <TaskInput />}
             <div className="mt-3">
               <Controls />
             </div>

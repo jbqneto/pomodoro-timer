@@ -7,6 +7,15 @@ export const ptMessages = {
     session: 'Sessão #',
     timeToFocus: 'Hora de focar!',
     timeForBreak: 'Hora da pausa!',
+    breakTipTitle: 'Dica para a pausa',
+    breakTipStand: 'Levante-se e caminhe por alguns instantes.',
+    breakTipEyes: 'Desvie o olhar da tela e foque em algo mais distante.',
+    breakTipStretch: 'Relaxe suavemente os ombros, o pescoço, os pulsos e as mãos.',
+    breakTipWater: 'Aproveite para beber um pouco de água.',
+    breakTipBreathe: 'Faça algumas respirações lentas e confortáveis.',
+    breakTipPosture: 'Mude de posição e solte tensões desnecessárias.',
+    breakTipScreenFree: 'Afaste-se da tela até o fim da pausa.',
+    breakTipRest: 'Deixe a mente descansar sem começar outra tarefa.',
     
     // Controls
     start: 'INICIAR',
@@ -89,6 +98,7 @@ export const ptMessages = {
     alarmVolume: 'Volume do alarme',
     musicVolume: 'Volume da música',
     startMusicWithTimer: 'Iniciar música com o timer',
+    showBreakTips: 'Mostrar dicas durante as pausas',
 
     // About
     aboutTitle: 'Por que o Focus Beat existe',

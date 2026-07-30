@@ -7,9 +7,16 @@ describe('localStorage adapters', () => {
   it('loads missing configuration as null and saves/clears valid data', () => {
     const repository = new LocalStorageConfigRepository(localStorage);
     expect(repository.load()).toBeNull();
-    const config = { activePlaylist: 'lofi' as const, soundEnabled: false, autoPlay: false, soundVolume: 0, musicVolume: 100 };
+    const config = { activePlaylist: 'lofi' as const, soundEnabled: false, autoPlay: false, soundVolume: 0, musicVolume: 100, showBreakTips: false };
     repository.save(config); expect(repository.load()).toEqual(config);
     repository.clear(); expect(localStorage.getItem(CONFIG_STORAGE_KEY)).toBeNull();
+  });
+  it('defaults missing or invalid break-tip preferences without changing other settings', () => {
+    const repository = new LocalStorageConfigRepository(localStorage);
+    localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify({ activePlaylist: 'lofi', showBreakTips: 'no' }));
+    expect(repository.load()).toMatchObject({ activePlaylist: 'lofi', showBreakTips: true });
+    localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify({ showBreakTips: false }));
+    expect(repository.load()?.showBreakTips).toBe(false);
   });
   it('migrates the catholic playlist identifier', () => {
     localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify({ activePlaylist: 'catholic', soundEnabled: true, autoPlay: true, soundVolume: 20, musicVolume: 30 }));
