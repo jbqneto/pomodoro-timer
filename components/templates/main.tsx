@@ -14,13 +14,15 @@ export default function MainTemplate({ children }: { children: ReactNode }) {
         <ThemeProvider>
       <LanguageProvider>
         <ConfigProvider>
-          <main className="min-h-screen bg-neutral-950 text-neutral-100">
+          <div className="flex min-h-dvh flex-col bg-neutral-950 text-neutral-100">
             <Header />
-            <section className="mx-auto mt-6 max-w-3xl px-4 space-y-6">
-              {children}
-            </section>
+            <main className="flex-1">
+              <section className="mx-auto mt-6 max-w-3xl space-y-6 px-4">
+                {children}
+              </section>
+            </main>
             <Footer />
-          </main>
+          </div>
         </ConfigProvider>
       </LanguageProvider>
       <Analytics />

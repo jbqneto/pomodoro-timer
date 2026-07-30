@@ -67,15 +67,16 @@ export const enMessages = {
     youtubeConsentInline: 'The YouTube player is blocked until you allow external media for this section.',
     
     // Footer
-    disclaimer: 'Built for focused work with timed sessions and background music.',
+    disclaimer: 'Made for focused work with timed sessions and background music.',
+    androidFooterNotice: 'An Android version is planned for the future.',
     
     // Header
     home: 'Home',
     language: 'Language',
     about: 'About',
     contact: 'Contact',
-    androidApp: 'Android App',
     settings: 'Settings',
+    settingsDescription: 'Configure timer presets, break tips, alarms, and music preferences.',
     close: 'Close',
 
     // Ad
@@ -85,11 +86,6 @@ export const enMessages = {
     heroEyebrow: 'Focus faster with music',
     heroTitle: 'One timer. The right music. Real focus.',
     heroDescription: 'Start a focus session in seconds with classical, lo-fi, or Gregorian playlists.',
-    androidBadge: 'Want something more complete?',
-    androidTitle: 'The full focus experience is coming to Android.',
-    androidDescription: 'Objectives, guided sessions, reminders, and personal insights will live in the mobile app. The web version stays fast and simple.',
-    androidCta: 'Android app coming soon',
-
     // Settings
     alarm: 'Alarm',
     volume: 'Volume',
