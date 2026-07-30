@@ -7,9 +7,18 @@ describe('localStorage adapters', () => {
   it('loads missing configuration as null and saves/clears valid data', () => {
     const repository = new LocalStorageConfigRepository(localStorage);
     expect(repository.load()).toBeNull();
-    const config = { activePlaylist: 'lofi' as const, soundEnabled: false, autoPlay: false, soundVolume: 0, musicVolume: 100, showBreakTips: false };
+    const config = { activePlaylist: 'lofi' as const, soundEnabled: false, autoPlay: false, soundVolume: 0, musicVolume: 100, showBreakTips: false, interfaceMode: 'simple' as const };
     repository.save(config); expect(repository.load()).toEqual(config);
     repository.clear(); expect(localStorage.getItem(CONFIG_STORAGE_KEY)).toBeNull();
+  });
+  it('migrates existing users to advanced and restores only valid saved modes', () => {
+    const repository = new LocalStorageConfigRepository(localStorage);
+    localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify({ activePlaylist: 'lofi' }));
+    expect(repository.load()?.interfaceMode).toBe('advanced');
+    localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify({ interfaceMode: 'simple' }));
+    expect(repository.load()?.interfaceMode).toBe('simple');
+    localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify({ interfaceMode: 'unexpected' }));
+    expect(repository.load()?.interfaceMode).toBe('advanced');
   });
   it('defaults missing or invalid break-tip preferences without changing other settings', () => {
     const repository = new LocalStorageConfigRepository(localStorage);

@@ -21,6 +21,13 @@ describe('ConfigContext', () => {
     expect(result.current.soundVolume).toBe(80)
     expect(result.current.activePlaylist).toBe('gregorian')
     expect(result.current.showBreakTips).toBe(true)
+    expect(result.current.interfaceMode).toBe('simple')
+  })
+
+  it('persists interface mode changes', async () => {
+    const { result } = renderHook(() => useConfig(), { wrapper })
+    act(() => result.current.setInterfaceMode('advanced'))
+    await waitFor(() => expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).interfaceMode).toBe('advanced'))
   })
 
   it('loads persisted settings from localStorage on mount', async () => {

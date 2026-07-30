@@ -95,6 +95,12 @@ export const ptMessages = {
     musicVolume: 'Volume da música',
     startMusicWithTimer: 'Iniciar música com o timer',
     showBreakTips: 'Mostrar dicas durante as pausas',
+    interfaceMode: 'Modo da interface',
+    simpleMode: 'Simples',
+    simpleModeDescription: 'Timer, tarefa e controles essenciais de música.',
+    advancedMode: 'Avançado',
+    advancedModeDescription: 'Controles completos de música, configurações personalizadas do timer e histórico de sessões.',
+    customPresetActiveNotice: 'Um preset personalizado está ativo. Selecione um preset padrão para substituí-lo.',
 
     // About
     aboutTitle: 'Por que o Focus Beat existe',

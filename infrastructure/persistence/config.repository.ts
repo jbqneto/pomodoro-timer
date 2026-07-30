@@ -1,5 +1,7 @@
 import { MusicOptionId } from '@/core/music/music.types';
 
+export type InterfaceMode = 'simple' | 'advanced';
+
 export type PersistedConfig = {
   activePlaylist: MusicOptionId;
   soundEnabled: boolean;
@@ -7,6 +9,7 @@ export type PersistedConfig = {
   soundVolume: number;
   musicVolume: number;
   showBreakTips: boolean;
+  interfaceMode: InterfaceMode;
 };
 
 export interface ConfigRepository {

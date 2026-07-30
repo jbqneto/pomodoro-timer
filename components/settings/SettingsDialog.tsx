@@ -11,12 +11,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { InterfaceMode } from "@/infrastructure/persistence/config.repository";
 
 type Props = { open: boolean; onClose: () => void };
 
 export default function SettingsDialog({ open, onClose }: Props) {
   const { t } = useLanguage();
-  const { soundEnabled, setSoundEnabled, soundVolume, setSoundVolume, musicVolume, setMusicVolume, autoPlay:autoPlayMusic, setAutoPlay:setAutoPlayMusic, showBreakTips, setShowBreakTips } = useConfig();
+  const { soundEnabled, setSoundEnabled, soundVolume, setSoundVolume, musicVolume, setMusicVolume, autoPlay:autoPlayMusic, setAutoPlay:setAutoPlayMusic, showBreakTips, setShowBreakTips, interfaceMode = 'advanced', setInterfaceMode } = useConfig();
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => { if (!nextOpen) onClose(); }}>
@@ -27,9 +29,34 @@ export default function SettingsDialog({ open, onClose }: Props) {
         </DialogHeader>
 
         <div className="space-y-5">
+          <fieldset>
+            <legend className="mb-2 text-sm font-medium text-neutral-300">{t('interfaceMode')}</legend>
+            <RadioGroup
+              aria-label={t('interfaceMode')}
+              value={interfaceMode}
+              onValueChange={(value) => setInterfaceMode(value as InterfaceMode)}
+              className="grid grid-cols-1 gap-2 sm:grid-cols-2"
+            >
+              {(['simple', 'advanced'] as const).map((mode) => {
+                const title = mode === 'simple' ? t('simpleMode') : t('advancedMode');
+                const description = mode === 'simple' ? t('simpleModeDescription') : t('advancedModeDescription');
+                const descriptionId = `${mode}-mode-description`;
+                return (
+                  <label key={mode} className={`flex cursor-pointer gap-3 rounded-xl border p-3 transition ${interfaceMode === mode ? 'border-sky-400 bg-sky-400/10 ring-1 ring-sky-400/40' : 'border-white/10 bg-white/[0.03] hover:bg-white/[0.06]'}`}>
+                    <RadioGroupItem value={mode} aria-label={title} aria-describedby={descriptionId} className="mt-0.5 shrink-0" />
+                    <span className="text-left">
+                      <span className="block text-sm font-semibold text-white">{title}</span>
+                      <span id={descriptionId} className="mt-1 block text-xs leading-5 text-neutral-400">{description}</span>
+                    </span>
+                  </label>
+                );
+              })}
+            </RadioGroup>
+          </fieldset>
+
           <div>
             <label className="mb-2 block text-sm font-medium text-neutral-300">{t('timerPreset')}</label>
-            <PresetSelector />
+            <PresetSelector allowCustom={interfaceMode === 'advanced'} />
           </div>
 
           <label className="flex items-center justify-between gap-4">
