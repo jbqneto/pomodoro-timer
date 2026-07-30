@@ -93,6 +93,12 @@ export const enMessages = {
     musicVolume: 'Music volume',
     startMusicWithTimer: 'Start music with timer',
     showBreakTips: 'Show tips during breaks',
+    interfaceMode: 'Interface mode',
+    simpleMode: 'Simple',
+    simpleModeDescription: 'Timer, task, and essential music controls.',
+    advancedMode: 'Advanced',
+    advancedModeDescription: 'Full music controls, custom timer settings, and session history.',
+    customPresetActiveNotice: 'A custom preset is currently active. Select a standard preset to replace it.',
 
     // About
     aboutTitle: 'Why Focus Beat exists',

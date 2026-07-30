@@ -10,16 +10,23 @@ import TimerCard from "@/components/timer/TimerCard";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/context/LanguageContext";
 import { SessionHistorySidebar } from "@/components/timer/SessionHistorySidebar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useConfig } from "@/context/ConfigContext";
 
 function HomeContent() {
   const { t } = useLanguage();
   const [historyOpen, setHistoryOpen] = useState(false);
+  const { interfaceMode } = useConfig();
+  const showHistory = interfaceMode !== 'simple';
+
+  useEffect(() => {
+    if (!showHistory) setHistoryOpen(false);
+  }, [showHistory]);
 
   return (
     <>
-      <div className={`flex min-h-dvh flex-col bg-neutral-950 text-neutral-100 transition-[padding] duration-300 ${historyOpen ? "md:pr-80" : "md:pr-[3.75rem]"}`}>
-        <Header onOpenHistory={() => setHistoryOpen(true)} />
+      <div className={`flex min-h-dvh flex-col bg-neutral-950 text-neutral-100 transition-[padding] duration-300 ${showHistory ? (historyOpen ? "md:pr-80" : "md:pr-[3.75rem]") : ""}`}>
+        <Header onOpenHistory={showHistory ? () => setHistoryOpen(true) : undefined} />
         <main className="flex-1">
           <section className="mx-auto mt-6 max-w-5xl space-y-6 px-4">
             <section className="px-1 py-2">
@@ -32,7 +39,7 @@ function HomeContent() {
         </main>
         <Footer />
       </div>
-      <SessionHistorySidebar open={historyOpen} onOpenChange={setHistoryOpen} />
+      {showHistory && <SessionHistorySidebar open={historyOpen} onOpenChange={setHistoryOpen} />}
     </>
   );
 }

@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import SettingsDialog from "./settings/SettingsDialog";
 import Link from "next/link";
 import { History } from "lucide-react";
+import { useConfig } from "@/context/ConfigContext";
 
 type HeaderProps = {
   onOpenHistory?: () => void;
@@ -12,6 +13,8 @@ type HeaderProps = {
 
 export default function Header({ onOpenHistory }: HeaderProps) {
   const { t,language, setLanguage } = useLanguage();
+  const { interfaceMode } = useConfig();
+  const showHistory = interfaceMode !== 'simple';
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const settingsOpener = useRef<HTMLButtonElement | null>(null);
@@ -84,7 +87,7 @@ export default function Header({ onOpenHistory }: HeaderProps) {
             <Link className="text-sm text-neutral-200" href="/" onClick={()=>setMenuOpen(false)}>{t('home')}</Link>
             <Link className="text-sm text-neutral-200" href="/about" onClick={()=>setMenuOpen(false)}>{t('about')}</Link>
 
-            {onOpenHistory && (
+            {showHistory && onOpenHistory && (
               <button
                 type="button"
                 className="flex items-center gap-2 py-1 text-left text-sm text-neutral-200"

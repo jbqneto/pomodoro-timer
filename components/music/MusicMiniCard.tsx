@@ -13,7 +13,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/
 const YOUTUBE_CONSENT_KEY = "youtube-media-consent";
 const MUSIC_OPTIONS = getMusicOptions();
 
-export default function MusicMiniCard() {
+export default function MusicMiniCard({ showTrackNavigation = true }: { showTrackNavigation?: boolean }) {
   const { t } = useLanguage();
   const { activePlaylist, musicVolume, autoPlay, setActivePlaylist, setMusicVolume } = useConfig();
   const { state: timerState } = useTimer();
@@ -140,7 +140,7 @@ export default function MusicMiniCard() {
         </div>
 
         <div className="mt-4 flex w-full items-center justify-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] sm:rounded-full sm:px-4">
-          <Tooltip>
+          {showTrackNavigation && <Tooltip>
             <TooltipTrigger asChild>
               <button
                 type="button"
@@ -155,7 +155,7 @@ export default function MusicMiniCard() {
             <TooltipContent className="border-white/10 bg-neutral-900 text-neutral-100">
               {t("previousTrack")}
             </TooltipContent>
-          </Tooltip>
+          </Tooltip>}
           <Tooltip>
             <TooltipTrigger asChild>
               <button
@@ -174,7 +174,7 @@ export default function MusicMiniCard() {
             </TooltipContent>
           </Tooltip>
 
-          <Tooltip>
+          {showTrackNavigation && <Tooltip>
             <TooltipTrigger asChild>
               <button
                 type="button"
@@ -189,7 +189,7 @@ export default function MusicMiniCard() {
             <TooltipContent className="border-white/10 bg-neutral-900 text-neutral-100">
               {t("nextTrack")}
             </TooltipContent>
-          </Tooltip>
+          </Tooltip>}
 
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/15 text-sky-300">
             <Volume2 className="h-4 w-4" />

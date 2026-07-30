@@ -5,7 +5,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { ChangeEvent } from "react";
 
-export function PresetSelector() {
+export function PresetSelector({ allowCustom = true }: { allowCustom?: boolean }) {
   const { preset, customPreset, setPreset, setCustomPreset, state } = useTimer();
   const { t } = useLanguage();
   const isIdle = state === 'idle';
@@ -32,7 +32,7 @@ export function PresetSelector() {
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+      <div className={`grid grid-cols-1 gap-2 ${allowCustom ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
         <Button
           onClick={() => handlePresetChange('25/5')}
           variant={preset === '25/5' ? 'default' : 'secondary'}
@@ -53,7 +53,7 @@ export function PresetSelector() {
           {t('quick')}
         </Button>
 
-        <Button
+        {allowCustom && <Button
           onClick={() => handlePresetChange('custom')}
           variant={preset === 'custom' ? 'default' : 'secondary'}
           size="sm"
@@ -61,10 +61,16 @@ export function PresetSelector() {
           disabled={!isIdle}
         >
           {t('custom')}
-        </Button>
+        </Button>}
       </div>
 
-      {preset === 'custom' && (
+      {!allowCustom && preset === 'custom' && (
+        <p className="rounded-lg border border-sky-300/20 bg-sky-400/10 px-3 py-2 text-left text-sm text-neutral-200" role="status">
+          {t('customPresetActiveNotice')}
+        </p>
+      )}
+
+      {allowCustom && preset === 'custom' && (
         <fieldset disabled={!isIdle} className="grid grid-cols-1 gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3 sm:grid-cols-3">
           <label className="min-w-0 text-xs font-medium text-neutral-300">
             {t('focusDuration')}

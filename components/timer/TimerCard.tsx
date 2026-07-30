@@ -10,7 +10,7 @@ import { useConfig } from "@/context/ConfigContext";
 
 export default function TimerCard() {
   const { phase, session } = useTimer();
-  const { showBreakTips } = useConfig();
+  const { showBreakTips, interfaceMode } = useConfig();
   const isFocus = phase === "focus";
 
   return (
@@ -31,7 +31,7 @@ export default function TimerCard() {
 
       <div className="relative grid gap-7 lg:grid-cols-[minmax(0,1.16fr)_minmax(19rem,0.84fr)] lg:items-stretch lg:gap-0">
         <div className="min-w-0 lg:border-r lg:border-white/10 lg:pr-7">
-          <MusicMiniCard />
+          <MusicMiniCard showTrackNavigation={interfaceMode !== "simple"} />
         </div>
 
         <div className="flex min-w-0 flex-col lg:pl-7">
