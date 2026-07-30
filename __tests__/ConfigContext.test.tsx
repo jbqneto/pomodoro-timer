@@ -19,7 +19,8 @@ describe('ConfigContext', () => {
     expect(result.current.soundEnabled).toBe(true)
     expect(result.current.autoPlay).toBe(true)
     expect(result.current.soundVolume).toBe(80)
-    expect(result.current.activePlaylist).toBe('catholic')
+    expect(result.current.musicVolume).toBe(30)
+    expect(result.current.activePlaylist).toBe('gregorian')
   })
 
   it('loads persisted settings from localStorage on mount', async () => {
@@ -76,7 +77,7 @@ describe('ConfigContext', () => {
     const { result } = renderHook(() => useConfig(), { wrapper })
 
     await waitFor(() => {
-      expect(result.current.activePlaylist).toBe('catholic')
+      expect(result.current.activePlaylist).toBe('gregorian')
     })
   })
 
@@ -84,6 +85,25 @@ describe('ConfigContext', () => {
     const { result } = renderHook(() => useConfig(), { wrapper })
     expect(result.current.getPlaylistId('lofi')).toBeTruthy()
     expect(result.current.getPlaylistId('classical')).toBeTruthy()
-    expect(result.current.getPlaylistId('catholic')).toBeTruthy()
+    expect(result.current.getPlaylistId('gregorian')).toBeTruthy()
+    expect(result.current.getPlaylistId('silence')).toBeNull()
+  })
+
+  it.each([-1, 101, Number.NaN, Number.POSITIVE_INFINITY, '80'])(
+    'rejects invalid persisted music volume %s', async (musicVolume) => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ musicVolume }))
+      const { result } = renderHook(() => useConfig(), { wrapper })
+      await waitFor(() => expect(result.current.musicVolume).toBe(30))
+    },
+  )
+
+  it('preserves valid persisted volumes and migrates catholic to gregorian', async () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ musicVolume: 72, soundVolume: 41, activePlaylist: 'catholic' }))
+    const { result } = renderHook(() => useConfig(), { wrapper })
+    await waitFor(() => {
+      expect(result.current.musicVolume).toBe(72)
+      expect(result.current.soundVolume).toBe(41)
+      expect(result.current.activePlaylist).toBe('gregorian')
+    })
   })
 })

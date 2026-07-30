@@ -68,6 +68,66 @@ describe('TimerContext', () => {
     expect(result.current.state).toBe('running')
   })
 
+  it('recalculates from the absolute deadline after a large clock jump', () => {
+    vi.setSystemTime(new Date('2026-07-29T09:00:00.000Z'))
+    const { result } = renderHook(() => useTimer(), { wrapper })
+    act(() => { result.current.startTimer() })
+    act(() => {
+      vi.setSystemTime(new Date('2026-07-29T09:10:00.000Z'))
+      vi.advanceTimersByTime(250)
+    })
+    expect(result.current.minutes * 60 + result.current.seconds).toBe(15 * 60)
+  })
+
+  it('recalculates immediately when the tab becomes visible', () => {
+    vi.setSystemTime(new Date('2026-07-29T09:00:00.000Z'))
+    const { result } = renderHook(() => useTimer(), { wrapper })
+    act(() => { result.current.startTimer() })
+    act(() => {
+      vi.setSystemTime(new Date('2026-07-29T09:05:00.000Z'))
+      Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' })
+      document.dispatchEvent(new Event('visibilitychange'))
+    })
+    expect(result.current.minutes * 60 + result.current.seconds).toBe(20 * 60)
+  })
+
+  it('pauses using the precise deadline and resumes with a new deadline', () => {
+    vi.setSystemTime(new Date('2026-07-29T09:00:00.000Z'))
+    const { result } = renderHook(() => useTimer(), { wrapper })
+    act(() => { result.current.startTimer() })
+    act(() => { vi.setSystemTime(new Date('2026-07-29T09:00:02.100Z')); result.current.pauseTimer() })
+    expect(result.current.minutes * 60 + result.current.seconds).toBe(1498)
+    act(() => { vi.setSystemTime(new Date('2026-07-29T10:00:00.000Z')); result.current.resumeTimer(); vi.advanceTimersByTime(1000) })
+    expect(result.current.minutes * 60 + result.current.seconds).toBe(1497)
+  })
+
+  it('restarts only the current phase and abandons the whole cycle separately', () => {
+    const { result } = renderHook(() => useTimer(), { wrapper })
+    act(() => { result.current.setCustomPreset({ focus: 1, break: 1, longBreak: 2 }); result.current.startTimer(); vi.advanceTimersByTime(60_000) })
+    expect(result.current.phase).toBe('break')
+    act(() => { result.current.startTimer(); vi.advanceTimersByTime(10_000); result.current.restartPhase() })
+    expect(result.current.phase).toBe('break')
+    expect(result.current.session).toBe(1)
+    expect(result.current.minutes * 60 + result.current.seconds).toBe(60)
+    const historyLength = result.current.sessionHistory.length
+    act(() => { result.current.abandonCycle() })
+    expect(result.current.phase).toBe('focus')
+    expect(result.current.session).toBe(1)
+    expect(result.current.sessionHistory).toHaveLength(historyLength)
+  })
+
+  it('completes once and removes its timer and visibility listener on unmount', () => {
+    const removeSpy = vi.spyOn(document, 'removeEventListener')
+    const { result, unmount } = renderHook(() => useTimer(), { wrapper })
+    act(() => { result.current.setCustomPreset({ focus: 1, break: 1, longBreak: 2 }); result.current.startTimer(); vi.advanceTimersByTime(120_000) })
+    expect(result.current.sessionHistory).toHaveLength(1)
+    act(() => { result.current.startTimer() })
+    const timersBeforeUnmount = vi.getTimerCount()
+    unmount()
+    expect(vi.getTimerCount()).toBeLessThan(timersBeforeUnmount)
+    expect(removeSpy).toHaveBeenCalledWith('visibilitychange', expect.any(Function))
+  })
+
   it('decrements timer by one each second', () => {
     const { result } = renderHook(() => useTimer(), { wrapper })
     const initialTotal = result.current.minutes * 60 + result.current.seconds

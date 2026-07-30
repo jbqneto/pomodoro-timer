@@ -4,6 +4,17 @@ import { useConfig } from '@/context/ConfigContext';
 import { useTimer } from '@/context/TimerContext';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
+type YouTubePlayerInstance = {
+  playVideo: () => void; pauseVideo: () => void; stopVideo: () => void;
+  previousVideo: () => void; nextVideo: () => void; setVolume: (volume: number) => void;
+  getIframe: () => HTMLIFrameElement; destroy: () => void;
+};
+type YouTubeApi = {
+  Player: new (id: string, options: Record<string, unknown>) => YouTubePlayerInstance;
+  PlayerState: { PLAYING: number };
+};
+declare global { interface Window { YT?: YouTubeApi; onYouTubeIframeAPIReady?: () => void } }
+
 type PlayerProperties = {
   onPlaybackStateChange?: (isPlaying: boolean) => void;
 }
@@ -22,7 +33,7 @@ const YouTubePlayer = forwardRef<YoutubePlayerRef, PlayerProperties>(({ onPlayba
   const { activePlaylist, autoPlay, musicVolume, getPlaylistId } = useConfig();
   const { state } = useTimer();
   const containerId = useRef(`yt-${Math.random().toString(36).slice(2)}`);
-  const playerRef = useRef<any>(null);
+  const playerRef = useRef<YouTubePlayerInstance | null>(null);
   const [apiReady, setApiReady] = useState(false);
 
 
@@ -78,29 +89,36 @@ const YouTubePlayer = forwardRef<YoutubePlayerRef, PlayerProperties>(({ onPlayba
   }));
 
   useEffect(() => {
+    if (activePlaylist === "silence") {
+      playerRef.current?.stopVideo();
+      playerRef.current?.destroy();
+      playerRef.current = null;
+      setApiReady(false);
+      onPlaybackStateChange?.(false);
+      return;
+    }
     const init = () => {
-      // @ts-ignore
       if (window.YT && window.YT.Player) {
         setApiReady(true);
         return;
       }
-      // @ts-ignore
       window.onYouTubeIframeAPIReady = () => setApiReady(true);
+      if (document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) return;
       const s = document.createElement("script");
       s.src = "https://www.youtube.com/iframe_api";
       s.async = true;
       document.head.appendChild(s);
     };
     init();
-  }, []);
+  }, [activePlaylist, onPlaybackStateChange]);
 
   useEffect(() => {
-    if (!apiReady || !activePlaylist) {
+    if (!apiReady || activePlaylist === "silence") {
       onPlaybackStateChange?.(false);
       return;
     }
-    // @ts-ignore
     const YT = window.YT;
+    if (!YT) return;
     const playlistId = getPlaylistId(activePlaylist);
 
     if (!playlistId) return;
@@ -124,18 +142,19 @@ const YouTubePlayer = forwardRef<YoutubePlayerRef, PlayerProperties>(({ onPlayba
       },
       events: {
         onReady: () => {
-          playerRef.current.getIframe().setAttribute("tabindex", "-1");
+          const player = playerRef.current;
+          if (!player) return;
+          player.getIframe().setAttribute("tabindex", "-1");
 
           if (state === 'running' && autoPlay) {
             playVideo();
           }
 
-          try { playerRef.current.setVolume(musicVolume); } catch {}
+          try { player.setVolume(musicVolume); } catch {}
         },
         onStateChange: (event: { data: number }) => {
-          // @ts-ignore
           const YT = window.YT;
-          onPlaybackStateChange?.(event.data === YT.PlayerState.PLAYING);
+          onPlaybackStateChange?.(event.data === YT?.PlayerState.PLAYING);
         },
       },
     });
@@ -164,7 +183,7 @@ const YouTubePlayer = forwardRef<YoutubePlayerRef, PlayerProperties>(({ onPlayba
 
   }, [state, autoPlay]);
 
-  if (!apiReady) return <></>
+  if (!apiReady || activePlaylist === "silence") return null;
 
   return (
     <div className="w-full aspect-video overflow-hidden rounded-xl">
@@ -172,5 +191,6 @@ const YouTubePlayer = forwardRef<YoutubePlayerRef, PlayerProperties>(({ onPlayba
     </div>
   );
 });
+YouTubePlayer.displayName = "YouTubePlayer";
 
 export default YouTubePlayer;

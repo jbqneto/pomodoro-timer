@@ -1,108 +1,100 @@
 "use client";
 
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 
-const playlists = {
-  lofi: 'PLgRDBI6ZEX_yqpTYSAgshj_vjoaMs0GP8', // Lo-fi study playlist
-  classical: 'PLgRDBI6ZEX_ztab0cICj_wIqo1GHjtzDd', // Classical study playlist
-  catholic: 'PLgRDBI6ZEX_zsw_JKMy_lEyXvvNENoEyr' // Catholic hymns playlist
+export type PlaylistType = "silence" | "gregorian" | "classical" | "lofi";
+
+const playlists: Record<Exclude<PlaylistType, "silence">, string> = {
+  lofi: "PLgRDBI6ZEX_yqpTYSAgshj_vjoaMs0GP8",
+  classical: "PLgRDBI6ZEX_ztab0cICj_wIqo1GHjtzDd",
+  // The existing playlist is retained; only its internal legacy category is migrated.
+  gregorian: "PLgRDBI6ZEX_zsw_JKMy_lEyXvvNENoEyr",
 };
 
 interface ConfigContextType {
   soundEnabled: boolean;
   autoPlay: boolean;
-  activePlaylist: PlaylistType | null;
+  activePlaylist: PlaylistType;
   soundVolume: number;
   musicVolume: number;
   setAutoPlay: (enabled: boolean) => void;
   setSoundVolume: (volume: number) => void;
   setMusicVolume: (volume: number) => void;
-  setActivePlaylist: (playlist: PlaylistType | null) => void;
+  setActivePlaylist: (playlist: PlaylistType) => void;
   setSoundEnabled: (enabled: boolean) => void;
-  getPlaylistId: (playlist: PlaylistType) => string;
+  getPlaylistId: (playlist: PlaylistType) => string | null;
 }
 
 const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
 const STORAGE_KEY = "focus-timer-config";
 
+function validVolume(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100;
+}
+
+function migratePlaylist(value: unknown): PlaylistType | null {
+  if (value === "catholic") return "gregorian";
+  if (value === "silence" || value === "gregorian" || value === "lofi" || value === "classical") return value;
+  return null;
+}
+
 export function ConfigProvider({ children }: { children: ReactNode }) {
-  const [activePlaylist, setActivePlaylist] = useState<PlaylistType | null>('catholic');
+  const [activePlaylist, setActivePlaylist] = useState<PlaylistType>("gregorian");
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [autoPlay, setAutoPlay] = useState(true);
-  const [soundVolume, setSoundVolume] = useState(80);
-  const [musicVolume, setMusicVolume] = useState(80);
+  const [soundVolume, setSoundVolumeState] = useState(80);
+  const [musicVolume, setMusicVolumeState] = useState(30);
+  const [hydrated, setHydrated] = useState(false);
 
-  const getPlaylistId = (playlist: PlaylistType) => {
-    return playlists[playlist];
-  };
+  const setSoundVolume = useCallback((volume: number) => {
+    if (validVolume(volume)) setSoundVolumeState(volume);
+  }, []);
+  const setMusicVolume = useCallback((volume: number) => {
+    if (validVolume(volume)) setMusicVolumeState(volume);
+  }, []);
+  const getPlaylistId = useCallback((playlist: PlaylistType) => (
+    playlist === "silence" ? null : playlists[playlist]
+  ), []);
 
   useEffect(() => {
     const storedConfig = window.localStorage.getItem(STORAGE_KEY);
-    if (!storedConfig) return;
-
-    try {
-      const parsed = JSON.parse(storedConfig) as Partial<ConfigContextType>;
-
-      if (typeof parsed.soundEnabled === "boolean") {
-        setSoundEnabled(parsed.soundEnabled);
+    if (storedConfig) {
+      try {
+        const parsed: unknown = JSON.parse(storedConfig);
+        if (parsed && typeof parsed === "object") {
+          const config = parsed as Record<string, unknown>;
+          if (typeof config.soundEnabled === "boolean") setSoundEnabled(config.soundEnabled);
+          if (typeof config.autoPlay === "boolean") setAutoPlay(config.autoPlay);
+          if (validVolume(config.soundVolume)) setSoundVolumeState(config.soundVolume);
+          if (validVolume(config.musicVolume)) setMusicVolumeState(config.musicVolume);
+          const playlist = migratePlaylist(config.activePlaylist);
+          if (playlist) setActivePlaylist(playlist);
+        } else {
+          window.localStorage.removeItem(STORAGE_KEY);
+        }
+      } catch {
+        window.localStorage.removeItem(STORAGE_KEY);
       }
-
-      if (typeof parsed.autoPlay === "boolean") {
-        setAutoPlay(parsed.autoPlay);
-      }
-
-      if (typeof parsed.soundVolume === "number") {
-        setSoundVolume(parsed.soundVolume);
-      }
-
-      if (typeof parsed.musicVolume === "number") {
-        setMusicVolume(parsed.musicVolume);
-      }
-
-      if (parsed.activePlaylist === null || parsed.activePlaylist === "lofi" || parsed.activePlaylist === "classical" || parsed.activePlaylist === "catholic") {
-        setActivePlaylist(parsed.activePlaylist);
-      }
-    } catch {
-      window.localStorage.removeItem(STORAGE_KEY);
     }
+    setHydrated(true);
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({
-        activePlaylist,
-        soundEnabled,
-        autoPlay,
-        soundVolume,
-        musicVolume,
-      }),
-    );
-  }, [activePlaylist, soundEnabled, autoPlay, soundVolume, musicVolume]);
-  
-  return (
-    <ConfigContext.Provider value={{
-      soundEnabled,
-      activePlaylist,
-      autoPlay,
-      soundVolume,
-      musicVolume,
-      setAutoPlay,
-      setSoundVolume,
-      setMusicVolume,
-      setActivePlaylist,
-      setSoundEnabled,
-      getPlaylistId
-    }}>
-      {children}
-    </ConfigContext.Provider>
-  );
+    if (!hydrated) return;
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      activePlaylist, soundEnabled, autoPlay, soundVolume, musicVolume,
+    }));
+  }, [activePlaylist, autoPlay, hydrated, musicVolume, soundEnabled, soundVolume]);
+
+  return <ConfigContext.Provider value={{
+    soundEnabled, activePlaylist, autoPlay, soundVolume, musicVolume,
+    setAutoPlay, setSoundVolume, setMusicVolume, setActivePlaylist,
+    setSoundEnabled, getPlaylistId,
+  }}>{children}</ConfigContext.Provider>;
 }
 
 export function useConfig() {
   const context = useContext(ConfigContext);
-  if (!context) {
-    throw new Error("useConfig must be used within a ConfigProvider");
-  }
+  if (!context) throw new Error("useConfig must be used within a ConfigProvider");
   return context;
 }
