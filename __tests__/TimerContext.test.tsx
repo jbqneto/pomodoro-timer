@@ -17,10 +17,12 @@ const BREAK_2_MS = 2 * 60 * 1000
 const SESSION_HISTORY_STORAGE_KEY = 'focus-timer-session-history'
 
 function createHistoryEntry(completedAt: string) {
+  const startedAt = new Date(new Date(completedAt).getTime() - 25 * 60 * 1000).toISOString()
   return {
     id: 'session-1',
     phase: 'focus' as const,
     durationMinutes: 25,
+    startedAt,
     completedAt,
     task: 'Write tests',
   }
@@ -222,6 +224,7 @@ describe('TimerContext', () => {
       sessions: [expect.objectContaining({
         phase: 'focus',
         durationMinutes: 1,
+        startedAt: '2026-07-29T09:00:00.000Z',
         completedAt: '2026-07-29T09:01:00.000Z',
       })],
     })

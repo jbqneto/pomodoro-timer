@@ -42,6 +42,7 @@ export function TimerProvider({ children, storage = defaultTimerStorage, clock =
   const alarmRef = useRef<HTMLAudioElement | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const endAtRef = useRef<number | null>(null);
+  const startedAtRef = useRef<number | null>(null);
 
   const clearTick = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -50,10 +51,14 @@ export function TimerProvider({ children, storage = defaultTimerStorage, clock =
   }, []);
   const startTimer = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
-    const today = getLocalDateKey(new Date(clock.now()));
+    const now = clock.now();
+    const today = getLocalDateKey(new Date(now));
     setHistory((current) => current.date === today ? current : { date: today, sessions: [] });
-    if (state === 'idle' && phase === 'focus') { try { analytics.track({name:'focus_started',properties:toFocusEventProperties(preset,customPreset,activePlaylist,interfaceMode)}); } catch {} }
-    const endAt = clock.now() + secondsRef.current * 1000;
+    if (state === 'idle') {
+      startedAtRef.current = now;
+      if (phase === 'focus') { try { analytics.track({name:'focus_started',properties:toFocusEventProperties(preset,customPreset,activePlaylist,interfaceMode)}); } catch {} }
+    }
+    const endAt = now + secondsRef.current * 1000;
     endAtRef.current = endAt;
     setState('running');
     const tick = () => { const remaining = calculateRemainingSeconds(endAt, clock.now()); secondsRef.current = remaining; setSeconds(remaining); };
@@ -66,6 +71,7 @@ export function TimerProvider({ children, storage = defaultTimerStorage, clock =
   const stopTimer = useCallback(() => {
     if (phase === 'focus' && state !== 'idle') { try { analytics.track({name:'focus_abandoned',properties:toFocusEventProperties(preset,customPreset,activePlaylist,interfaceMode)}); } catch {} }
     clearTick();
+    startedAtRef.current = null;
     const reset = abandonCycle({ preset, customPreset });
     secondsRef.current = reset.durationMinutes * 60;
     setState(reset.status); setPhase(reset.phase); setSession(reset.session); setSeconds(secondsRef.current);
@@ -100,7 +106,8 @@ export function TimerProvider({ children, storage = defaultTimerStorage, clock =
     const completedAt = new Date(clock.now());
     const durationMinutes = getPhaseDurationMinutes({ phase, session, preset, customPreset });
     const entry: SessionHistoryEntry = { id: `${clock.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      phase, durationMinutes, completedAt: completedAt.toISOString(), task: task.trim() };
+      phase, durationMinutes, startedAt: new Date(startedAtRef.current ?? clock.now()).toISOString(), completedAt: completedAt.toISOString(), task: task.trim() };
+    startedAtRef.current = null;
     const date = getLocalDateKey(completedAt);
     setHistory((current) => ({ date, sessions: [entry, ...(current.date === date ? current.sessions : [])].slice(0, MAX_HISTORY_ENTRIES) }));
     if (phase === 'focus') { try { analytics.track({name:'focus_completed',properties:toFocusEventProperties(preset,customPreset,activePlaylist,interfaceMode)}); } catch {} onFocusCompleted?.(); }

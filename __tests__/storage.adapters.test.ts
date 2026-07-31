@@ -43,9 +43,10 @@ describe('localStorage adapters', () => {
     expect(loaded.task).toHaveLength(160); expect(loaded.isTaskLocked).toBe(true);
   });
   it('loads current history and migrates legacy arrays', () => {
-    const entry = { id: '1', phase: 'focus', durationMinutes: 25, completedAt: '2026-07-30T12:00:00.000Z', task: '' };
+    const legacyEntry = { id: '1', phase: 'focus', durationMinutes: 25, completedAt: '2026-07-30T12:00:00.000Z', task: '' };
+    const entry = { ...legacyEntry, startedAt: '2026-07-30T11:35:00.000Z' };
     const storage = new LocalStorageTimerStorage(localStorage);
-    localStorage.setItem(TIMER_STORAGE_KEYS.history, JSON.stringify([entry]));
+    localStorage.setItem(TIMER_STORAGE_KEYS.history, JSON.stringify([legacyEntry]));
     expect(storage.load().history).toEqual({ date: '2026-07-30', sessions: [entry] });
     localStorage.setItem(TIMER_STORAGE_KEYS.history, JSON.stringify({ date: '2026-07-30', sessions: [entry] }));
     expect(storage.load().history?.sessions).toEqual([entry]);

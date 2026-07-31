@@ -19,8 +19,8 @@ export function SessionHistorySidebar({ open, onOpenChange }: Props) {
     year: "numeric",
   }).format(new Date(`${sessionHistoryDate}T12:00:00`));
 
-  const formatCompletedAt = (completedAt: string) => {
-    const date = new Date(completedAt);
+  const formatDateTime = (value: string) => {
+    const date = new Date(value);
     if (Number.isNaN(date.getTime())) return "";
 
     return new Intl.DateTimeFormat(language === "pt" ? "pt-PT" : "en-US", {
@@ -93,15 +93,17 @@ export function SessionHistorySidebar({ open, onOpenChange }: Props) {
                             <Icon className="h-4 w-4" aria-hidden="true" />
                           </span>
                           <div className="min-w-0 flex-1">
-                            <div className="text-right text-sm">
+                            <div className="flex items-center justify-between gap-3 text-sm">
+                              {entry.task && (
+                                <p className="min-w-0 flex-1 truncate text-xs text-neutral-300" title={entry.task}>{entry.task}</p>
+                              )}
                               <span className="shrink-0 text-neutral-400">{entry.durationMinutes} {t("minutesShort")}</span>
                             </div>
-                            {entry.task && (
-                              <p className="mt-1 truncate text-xs text-neutral-300" title={entry.task}>{entry.task}</p>
-                            )}
-                            <time className="mt-1 block text-xs text-neutral-500" dateTime={entry.completedAt}>
-                              {formatCompletedAt(entry.completedAt)}
-                            </time>
+                            <p className="mt-1 flex items-center gap-1 text-xs text-neutral-500">
+                              <time dateTime={entry.startedAt}>{formatDateTime(entry.startedAt)}</time>
+                              <span aria-hidden="true">→</span>
+                              <time dateTime={entry.completedAt}>{formatDateTime(entry.completedAt)}</time>
+                            </p>
                           </div>
                         </div>
                       </li>

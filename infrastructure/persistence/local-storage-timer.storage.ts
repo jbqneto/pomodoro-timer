@@ -17,16 +17,33 @@ function validDateKey(value: unknown): value is string {
   const date = new Date(year, month - 1, day);
   return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
 }
-function validEntry(value: unknown): value is SessionHistoryEntry {
-  if (!value || typeof value !== 'object') return false;
-  const entry = value as SessionHistoryEntry;
-  return typeof entry.id === 'string' && (entry.phase === 'focus' || entry.phase === 'break') &&
-    Number.isInteger(entry.durationMinutes) && entry.durationMinutes >= 1 && entry.durationMinutes <= 180 &&
-    typeof entry.completedAt === 'string' && !Number.isNaN(new Date(entry.completedAt).getTime()) && typeof entry.task === 'string';
+function normalizeHistoryEntry(value: unknown): SessionHistoryEntry | null {
+  if (!value || typeof value !== 'object') return null;
+  const entry = value as Partial<SessionHistoryEntry>;
+  const { id, phase, durationMinutes, completedAt: completedAtValue, startedAt: storedStartedAt, task } = entry;
+  if (typeof id !== 'string' || (phase !== 'focus' && phase !== 'break') ||
+    typeof durationMinutes !== 'number' || !Number.isInteger(durationMinutes) || durationMinutes < 1 || durationMinutes > 180 ||
+    typeof completedAtValue !== 'string' || Number.isNaN(new Date(completedAtValue).getTime()) || typeof task !== 'string') return null;
+
+  const completedAt = new Date(completedAtValue);
+  const startedAt = typeof storedStartedAt === 'string' &&
+    !Number.isNaN(new Date(storedStartedAt).getTime()) &&
+    new Date(storedStartedAt) <= completedAt
+      ? storedStartedAt
+      : new Date(completedAt.getTime() - durationMinutes * 60_000).toISOString();
+
+  return { id, phase, durationMinutes, startedAt, completedAt: completedAtValue, task };
+}
+
+function normalizeHistoryEntries(entries: unknown[]): SessionHistoryEntry[] {
+  return entries
+    .map(normalizeHistoryEntry)
+    .filter((entry): entry is SessionHistoryEntry => entry !== null)
+    .slice(0, MAX_HISTORY_ENTRIES);
 }
 export function parseSessionHistory(value: unknown): SessionHistoryStorage | null {
   if (Array.isArray(value)) {
-    const sessions = value.filter(validEntry).slice(0, MAX_HISTORY_ENTRIES);
+    const sessions = normalizeHistoryEntries(value);
     if (!sessions.length) return null;
     const date = getLocalDateKey(new Date(sessions[0].completedAt));
     return { date, sessions: sessions.filter((item) => getLocalDateKey(new Date(item.completedAt)) === date) };
@@ -34,7 +51,7 @@ export function parseSessionHistory(value: unknown): SessionHistoryStorage | nul
   if (!value || typeof value !== 'object') return null;
   const history = value as SessionHistoryStorage;
   if (!validDateKey(history.date) || !Array.isArray(history.sessions)) return null;
-  return { date: history.date, sessions: history.sessions.filter(validEntry)
+  return { date: history.date, sessions: normalizeHistoryEntries(history.sessions)
     .filter((item) => getLocalDateKey(new Date(item.completedAt)) === history.date).slice(0, MAX_HISTORY_ENTRIES) };
 }
 
