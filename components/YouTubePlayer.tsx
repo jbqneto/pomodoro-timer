@@ -24,10 +24,13 @@ const YouTubePlayer = forwardRef<YoutubePlayerRef, Props>(({ source, volume, sho
   useEffect(() => loadYouTubeApi(() => setApiReady(true)), []);
   useEffect(() => {
     if (!apiReady || !window.YT) return;
+    const sourceOptions = source.type === 'youtube-video'
+      ? { videoId: source.videoId }
+      : { playerVars: { listType: 'playlist', list: source.playlistId } };
     player.current = new window.YT.Player(containerId.current, {
       host: 'https://www.youtube-nocookie.com', height: '100%', width: '100%',
-      videoId: source.type === 'youtube-video' ? source.videoId : undefined,
-      playerVars: { ...(source.type === 'youtube-playlist' ? { listType: 'playlist', list: source.playlistId } : {}), rel: 0, autoplay: 0, controls: 0, disablekb: 1, fs: 0,
+      ...sourceOptions,
+      playerVars: { ...(source.type === 'youtube-playlist' ? sourceOptions.playerVars : {}), rel: 0, autoplay: 0, controls: 0, disablekb: 1, fs: 0,
         modestbranding: 1, enablejsapi: 1, origin: window.location.origin },
       events: {
         onReady: () => { player.current?.getIframe().setAttribute('tabindex', '-1'); player.current?.setVolume(volumeRef.current); if (shouldPlayRef.current) player.current?.playVideo(); },
