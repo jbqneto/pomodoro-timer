@@ -67,6 +67,13 @@ export const ptMessages = {
     youtubeConsentDecline: 'Agora não',
     youtubeConsentReview: 'Revisar consentimento do YouTube',
     youtubeConsentInline: 'O player do YouTube fica bloqueado até você permitir mídia externa para esta seção.',
+    customPlaylist: 'Playlist personalizada +',
+    customPlaylistTitle: 'Playlist personalizada do YouTube',
+    customPlaylistDescription: 'Cole um link de vídeo ou playlist do YouTube para usá-lo durante as sessões.',
+    customPlaylistUrl: 'Link do YouTube',
+    customPlaylistPlaceholder: 'https://www.youtube.com/watch?v=…',
+    customPlaylistInvalidUrl: 'Insira um link válido de vídeo ou playlist do YouTube.',
+    saveCustomPlaylist: 'Usar esta playlist',
     
     // Footer
     disclaimer: 'Feito para trabalho focado com sessões temporizadas e música de fundo.',

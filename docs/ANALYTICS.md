@@ -11,6 +11,6 @@ Custom events are disabled by default. Set `NEXT_PUBLIC_PRODUCT_ANALYTICS_ENABLE
 | `returning_focus_completed` | First completion on a later local date | `gap_bucket`, `interface_mode` |
 | `usefulness_feedback_submitted` | A feedback answer is selected | `response`, `interface_mode` |
 
-Preset categories are `classic`, `quick`, and `custom`; duration buckets are `up_to_15`, `16_to_30`, `31_to_50`, and `over_50`; music categories are `silence`, `gregorian`, `classical`, and `lofi`. Return gaps are `next_day`, `2_to_7_days`, or `8_plus_days`; feedback responses are `yes`, `partly`, or `no`.
+Preset categories are `classic`, `quick`, and `custom`; duration buckets are `up_to_15`, `16_to_30`, `31_to_50`, and `over_50`; music categories are `silence`, `gregorian`, `classical`, `lofi`, and `custom`. Return gaps are `next_day`, `2_to_7_days`, or `8_plus_days`; feedback responses are `yes`, `partly`, or `no`.
 
 Events must never contain task or note text, history, session IDs, timestamps or dates, exact custom durations, identifiers, email or IP addresses, user-data URLs, raw localStorage, or free text.

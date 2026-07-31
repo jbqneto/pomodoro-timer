@@ -7,7 +7,7 @@ describe('localStorage adapters', () => {
   it('loads missing configuration as null and saves/clears valid data', () => {
     const repository = new LocalStorageConfigRepository(localStorage);
     expect(repository.load()).toBeNull();
-    const config = { activePlaylist: 'lofi' as const, soundEnabled: false, autoPlay: false, soundVolume: 0, musicVolume: 100, showBreakTips: false, interfaceMode: 'simple' as const, askForOccasionalFeedback: true };
+    const config = { activePlaylist: 'lofi' as const, customMusicSource: null, soundEnabled: false, autoPlay: false, soundVolume: 0, musicVolume: 100, showBreakTips: false, interfaceMode: 'simple' as const, askForOccasionalFeedback: true };
     repository.save(config); expect(repository.load()).toEqual(config);
     repository.clear(); expect(localStorage.getItem(CONFIG_STORAGE_KEY)).toBeNull();
   });

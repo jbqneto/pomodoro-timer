@@ -1,4 +1,4 @@
-import { MusicOption, MusicOptionId, MusicSource } from './music.types';
+import { MusicOption, MusicOptionId, MusicSource, OfficialMusicOptionId } from './music.types';
 
 const options: readonly MusicOption[] = [
   { id: 'silence', source: { type: 'silence' } },
@@ -8,8 +8,8 @@ const options: readonly MusicOption[] = [
 ];
 
 export function getMusicOptions(): readonly MusicOption[] { return options; }
-export function getMusicOption(id: MusicOptionId): MusicOption { return options.find((option) => option.id === id)!; }
-export function getMusicSource(id: MusicOptionId): MusicSource { return getMusicOption(id).source; }
+export function getMusicOption(id: OfficialMusicOptionId): MusicOption { return options.find((option) => option.id === id)!; }
+export function getMusicSource(id: OfficialMusicOptionId): MusicSource { return getMusicOption(id).source; }
 export function isMusicOptionId(value: unknown): value is MusicOptionId {
-  return typeof value === 'string' && options.some((option) => option.id === value);
+  return value === 'custom' || (typeof value === 'string' && options.some((option) => option.id === value));
 }

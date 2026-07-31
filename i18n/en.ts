@@ -65,6 +65,13 @@ export const enMessages = {
     youtubeConsentDecline: 'Not now',
     youtubeConsentReview: 'Review YouTube consent',
     youtubeConsentInline: 'The YouTube player is blocked until you allow external media for this section.',
+    customPlaylist: 'Custom playlist +',
+    customPlaylistTitle: 'Custom YouTube playlist',
+    customPlaylistDescription: 'Paste a YouTube video or playlist link to use it during your sessions.',
+    customPlaylistUrl: 'YouTube link',
+    customPlaylistPlaceholder: 'https://www.youtube.com/watch?v=…',
+    customPlaylistInvalidUrl: 'Enter a valid YouTube video or playlist link.',
+    saveCustomPlaylist: 'Use this playlist',
     
     // Footer
     disclaimer: 'Made for focused work with timed sessions and background music.',

@@ -1,8 +1,9 @@
 import { isMusicOptionId } from '@/core/music/music.catalog';
+import { isCustomMusicSource } from '@/core/music/music.types';
 import { ConfigRepository, PersistedConfig } from './config.repository';
 
 export const CONFIG_STORAGE_KEY = 'focus-timer-config';
-const DEFAULTS: PersistedConfig = { activePlaylist: 'gregorian', soundEnabled: true, autoPlay: true, soundVolume: 25, musicVolume: 25, showBreakTips: true, interfaceMode: 'simple', askForOccasionalFeedback: true };
+const DEFAULTS: PersistedConfig = { activePlaylist: 'gregorian', customMusicSource: null, soundEnabled: true, autoPlay: true, soundVolume: 25, musicVolume: 25, showBreakTips: true, interfaceMode: 'simple', askForOccasionalFeedback: true };
 const isVolume = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 100;
 
 export class LocalStorageConfigRepository implements ConfigRepository {
@@ -15,6 +16,7 @@ export class LocalStorageConfigRepository implements ConfigRepository {
       if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Invalid config');
       const migratedPlaylist = value.activePlaylist === 'catholic' ? 'gregorian' : value.activePlaylist;
       if (value.activePlaylist !== undefined && !isMusicOptionId(migratedPlaylist)) throw new Error('Invalid config');
+      if (value.customMusicSource !== undefined && value.customMusicSource !== null && !isCustomMusicSource(value.customMusicSource)) throw new Error('Invalid config');
       if (value.soundEnabled !== undefined && typeof value.soundEnabled !== 'boolean') throw new Error('Invalid config');
       if (value.autoPlay !== undefined && typeof value.autoPlay !== 'boolean') throw new Error('Invalid config');
       if (value.soundVolume !== undefined && !isVolume(value.soundVolume)) throw new Error('Invalid config');
@@ -24,7 +26,11 @@ export class LocalStorageConfigRepository implements ConfigRepository {
       const interfaceMode = value.interfaceMode === 'simple' || value.interfaceMode === 'advanced'
         ? value.interfaceMode
         : 'advanced';
-      return { activePlaylist: isMusicOptionId(migratedPlaylist) ? migratedPlaylist : DEFAULTS.activePlaylist,
+      const customMusicSource = isCustomMusicSource(value.customMusicSource) ? value.customMusicSource : null;
+      const activePlaylist = isMusicOptionId(migratedPlaylist) && (migratedPlaylist !== 'custom' || customMusicSource)
+        ? migratedPlaylist
+        : DEFAULTS.activePlaylist;
+      return { activePlaylist, customMusicSource,
         soundEnabled: typeof value.soundEnabled === 'boolean' ? value.soundEnabled : DEFAULTS.soundEnabled,
         autoPlay: typeof value.autoPlay === 'boolean' ? value.autoPlay : DEFAULTS.autoPlay,
         soundVolume: isVolume(value.soundVolume) ? value.soundVolume : DEFAULTS.soundVolume,

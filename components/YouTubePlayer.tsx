@@ -1,12 +1,13 @@
 "use client";
 
 import { loadYouTubeApi, YouTubePlayerInstance } from '@/infrastructure/music/youtube-api';
+import { CustomMusicSource } from '@/core/music/music.types';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 export interface YoutubePlayerRef { playVideo(): void; pauseVideo(): void; stopVideo(): void; previousVideo(): void; nextVideo(): void; setVolume(value: number): void }
-type Props = { playlistId: string; volume: number; shouldPlay: boolean; onPlaybackStateChange?(playing: boolean): void };
+type Props = { source: CustomMusicSource; volume: number; shouldPlay: boolean; onPlaybackStateChange?(playing: boolean): void };
 
-const YouTubePlayer = forwardRef<YoutubePlayerRef, Props>(({ playlistId, volume, shouldPlay, onPlaybackStateChange }, ref) => {
+const YouTubePlayer = forwardRef<YoutubePlayerRef, Props>(({ source, volume, shouldPlay, onPlaybackStateChange }, ref) => {
   const containerId = useRef(`yt-${Math.random().toString(36).slice(2)}`);
   const player = useRef<YouTubePlayerInstance | null>(null);
   const volumeRef = useRef(volume);
@@ -25,7 +26,8 @@ const YouTubePlayer = forwardRef<YoutubePlayerRef, Props>(({ playlistId, volume,
     if (!apiReady || !window.YT) return;
     player.current = new window.YT.Player(containerId.current, {
       host: 'https://www.youtube-nocookie.com', height: '100%', width: '100%',
-      playerVars: { listType: 'playlist', list: playlistId, rel: 0, autoplay: 0, controls: 0, disablekb: 1, fs: 0,
+      videoId: source.type === 'youtube-video' ? source.videoId : undefined,
+      playerVars: { ...(source.type === 'youtube-playlist' ? { listType: 'playlist', list: source.playlistId } : {}), rel: 0, autoplay: 0, controls: 0, disablekb: 1, fs: 0,
         modestbranding: 1, enablejsapi: 1, origin: window.location.origin },
       events: {
         onReady: () => { player.current?.getIframe().setAttribute('tabindex', '-1'); player.current?.setVolume(volumeRef.current); if (shouldPlayRef.current) player.current?.playVideo(); },
@@ -33,7 +35,7 @@ const YouTubePlayer = forwardRef<YoutubePlayerRef, Props>(({ playlistId, volume,
       },
     });
     return () => { onPlaybackStateChange?.(false); try { player.current?.destroy(); } catch {} player.current = null; };
-  }, [apiReady, playlistId, onPlaybackStateChange]);
+  }, [apiReady, onPlaybackStateChange, source]);
   useEffect(() => { call('setVolume', volume); }, [volume]);
   useEffect(() => { call(shouldPlay ? 'playVideo' : 'pauseVideo'); }, [shouldPlay]);
   if (!apiReady) return null;

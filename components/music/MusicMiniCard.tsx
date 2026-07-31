@@ -1,34 +1,60 @@
 "use client";
 
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import YouTubePlayer, { YoutubePlayerRef } from "../YouTubePlayer";
 import { useLanguage } from "@/context/LanguageContext";
 import { useConfig } from "@/context/ConfigContext";
 import { useTimer } from "@/context/TimerContext";
 import { getMusicOptions, getMusicSource } from "@/core/music/music.catalog";
-import { MusicOptionId } from "@/core/music/music.types";
+import { MusicOptionId, MusicSource } from "@/core/music/music.types";
+import { parseYouTubeUrl } from "@/core/music/youtube-url";
 import { ChevronDown, Music4, Pause, Play, SkipBack, SkipForward, Volume2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
 
 const YOUTUBE_CONSENT_KEY = "youtube-media-consent";
 const MUSIC_OPTIONS = getMusicOptions();
 
 export default function MusicMiniCard({ showTrackNavigation = true }: { showTrackNavigation?: boolean }) {
   const { t } = useLanguage();
-  const { activePlaylist, musicVolume, autoPlay, setActivePlaylist, setMusicVolume } = useConfig();
+  const { activePlaylist, customMusicSource, musicVolume, autoPlay, setActivePlaylist, setCustomMusicSource, setMusicVolume } = useConfig();
   const { state: timerState } = useTimer();
   const playerRef = useRef<YoutubePlayerRef>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [consent, setConsent] = useState<"granted" | "denied" | null>(null);
   const [showConsentModal, setShowConsentModal] = useState(false);
+  const [showCustomPlaylistModal, setShowCustomPlaylistModal] = useState(false);
+  const [customPlaylistUrl, setCustomPlaylistUrl] = useState("");
+  const [customPlaylistError, setCustomPlaylistError] = useState("");
 
   function handleVolumeChange(event: ChangeEvent<HTMLInputElement>): void {
     setMusicVolume(Number(event.target.value));
   }
 
   function handlePlaylistChange(event: ChangeEvent<HTMLSelectElement>): void {
-    setActivePlaylist(event.target.value as MusicOptionId);
+    const nextPlaylist = event.target.value as MusicOptionId;
+    if (nextPlaylist === 'custom') {
+      setCustomPlaylistUrl("");
+      setCustomPlaylistError("");
+      setShowCustomPlaylistModal(true);
+      return;
+    }
+    setActivePlaylist(nextPlaylist);
     setIsPlaying(false);
+  }
+
+  function saveCustomPlaylist(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const source = parseYouTubeUrl(customPlaylistUrl);
+    if (!source) {
+      setCustomPlaylistError(t("customPlaylistInvalidUrl"));
+      return;
+    }
+
+    setCustomMusicSource(source);
+    setActivePlaylist('custom');
+    setIsPlaying(false);
+    setShowCustomPlaylistModal(false);
   }
 
   useEffect(() => {
@@ -36,7 +62,8 @@ export default function MusicMiniCard({ showTrackNavigation = true }: { showTrac
   }, [musicVolume]);
 
   useEffect(() => {
-    if (getMusicSource(activePlaylist).type === 'silence') return;
+    const source = activePlaylist === 'custom' ? customMusicSource : getMusicSource(activePlaylist);
+    if (!source || source.type === 'silence') return;
     const storedConsent = window.localStorage.getItem(YOUTUBE_CONSENT_KEY);
 
     if (storedConsent === "granted" || storedConsent === "denied") {
@@ -45,7 +72,7 @@ export default function MusicMiniCard({ showTrackNavigation = true }: { showTrac
     }
 
     setShowConsentModal(true);
-  }, [activePlaylist]);
+  }, [activePlaylist, customMusicSource]);
 
   function togglePlayback() {
     if (!playerRef.current || consent !== "granted") return;
@@ -80,9 +107,12 @@ export default function MusicMiniCard({ showTrackNavigation = true }: { showTrac
     }
   }
 
-  const selectedSource = getMusicSource(activePlaylist);
-  const hasYouTubeSource = selectedSource.type === 'youtube-playlist';
+  const selectedSource: MusicSource = activePlaylist === 'custom'
+    ? customMusicSource ?? { type: 'silence' }
+    : getMusicSource(activePlaylist);
+  const hasYouTubeSource = selectedSource.type !== 'silence';
   const controlsDisabled = !hasYouTubeSource || consent !== 'granted';
+  const canNavigateTracks = selectedSource.type === 'youtube-playlist';
 
   return (
     <TooltipProvider delayDuration={120}>
@@ -108,6 +138,7 @@ export default function MusicMiniCard({ showTrackNavigation = true }: { showTrac
                     {t(option.id)}
                   </option>
                 ))}
+                <option value="custom" className="bg-neutral-950 text-neutral-100">{t("customPlaylist")}</option>
               </select>
               <ChevronDown
                 aria-hidden="true"
@@ -121,7 +152,7 @@ export default function MusicMiniCard({ showTrackNavigation = true }: { showTrac
           {!hasYouTubeSource ? (
             <div className="aspect-video" />
           ) : consent === "granted" ? (
-            <YouTubePlayer ref={playerRef} playlistId={selectedSource.playlistId} volume={musicVolume}
+            <YouTubePlayer ref={playerRef} source={selectedSource} volume={musicVolume}
               shouldPlay={timerState === 'running' && autoPlay} onPlaybackStateChange={setIsPlaying} />
           ) : (
             <div className="flex aspect-video flex-col items-center justify-center gap-4 px-6 text-center">
@@ -147,7 +178,7 @@ export default function MusicMiniCard({ showTrackNavigation = true }: { showTrac
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-neutral-100 transition-all duration-200 hover:-translate-y-px hover:bg-white/10 focus-ring disabled:cursor-not-allowed disabled:text-neutral-500 disabled:hover:translate-y-0 disabled:hover:bg-white/5"
                 onClick={playPreviousTrack}
                 aria-label={t("previousTrack")}
-                disabled={controlsDisabled}
+                disabled={controlsDisabled || !canNavigateTracks}
               >
                 <SkipBack className="h-4 w-4" />
               </button>
@@ -181,7 +212,7 @@ export default function MusicMiniCard({ showTrackNavigation = true }: { showTrac
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-neutral-100 transition-all duration-200 hover:-translate-y-px hover:bg-white/10 focus-ring disabled:cursor-not-allowed disabled:text-neutral-500 disabled:hover:translate-y-0 disabled:hover:bg-white/5"
                 onClick={playNextTrack}
                 aria-label={t("nextTrack")}
-                disabled={controlsDisabled}
+                disabled={controlsDisabled || !canNavigateTracks}
               >
                 <SkipForward className="h-4 w-4" />
               </button>
@@ -251,6 +282,33 @@ export default function MusicMiniCard({ showTrackNavigation = true }: { showTrac
           </div>
         </div>
       )}
+
+      <Dialog open={showCustomPlaylistModal} onOpenChange={setShowCustomPlaylistModal}>
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-lg border-white/10 bg-neutral-900 text-neutral-100">
+          <DialogHeader>
+            <DialogTitle>{t("customPlaylistTitle")}</DialogTitle>
+            <DialogDescription className="text-neutral-400">{t("customPlaylistDescription")}</DialogDescription>
+          </DialogHeader>
+          <form className="space-y-4" onSubmit={saveCustomPlaylist}>
+            <label className="block space-y-2 text-sm font-medium text-neutral-200" htmlFor="custom-youtube-url">
+              {t("customPlaylistUrl")}
+              <input
+                id="custom-youtube-url"
+                autoFocus
+                type="url"
+                value={customPlaylistUrl}
+                onChange={(event) => { setCustomPlaylistUrl(event.target.value); setCustomPlaylistError(""); }}
+                placeholder={t("customPlaylistPlaceholder")}
+                className="h-11 w-full rounded-xl border border-white/10 bg-neutral-950 px-3 text-sm text-white outline-none placeholder:text-neutral-600 focus:border-sky-300/70 focus:ring-2 focus:ring-sky-400/35"
+              />
+            </label>
+            {customPlaylistError && <p role="alert" className="text-sm text-rose-300">{customPlaylistError}</p>}
+            <button type="submit" className="w-full rounded-xl bg-sky-500 px-4 py-2 font-semibold text-white hover:bg-sky-400 focus-ring">
+              {t("saveCustomPlaylist")}
+            </button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </TooltipProvider>
   );
 }

@@ -1,9 +1,10 @@
-import { MusicOptionId } from '@/core/music/music.types';
+import { CustomMusicSource, MusicOptionId } from '@/core/music/music.types';
 
 export type InterfaceMode = 'simple' | 'advanced';
 
 export type PersistedConfig = {
   activePlaylist: MusicOptionId;
+  customMusicSource: CustomMusicSource | null;
   soundEnabled: boolean;
   autoPlay: boolean;
   soundVolume: number;

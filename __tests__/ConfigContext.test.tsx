@@ -63,6 +63,18 @@ describe('ConfigContext', () => {
     })
   })
 
+  it('persists a custom YouTube source', async () => {
+    const { result } = renderHook(() => useConfig(), { wrapper })
+    const source = { type: 'youtube-video' as const, videoId: '2ojMshIhLmw' }
+
+    act(() => {
+      result.current.setCustomMusicSource(source)
+      result.current.setActivePlaylist('custom')
+    })
+
+    await waitFor(() => expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).customMusicSource).toEqual(source))
+  })
+
   it('handles corrupt localStorage data gracefully', async () => {
     localStorage.setItem(STORAGE_KEY, 'not-valid-json{{{')
 
