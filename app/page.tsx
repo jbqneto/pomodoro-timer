@@ -25,7 +25,7 @@ function HomeContent() {
 
   return (
     <>
-      <div className={`flex min-h-dvh flex-col bg-neutral-950 text-neutral-100 transition-[padding] duration-300 ${showHistory ? (historyOpen ? "md:pr-80" : "md:pr-[3.75rem]") : ""}`}>
+      <div className={`flex min-h-screen flex-col bg-neutral-950 text-neutral-100 transition-[padding] duration-300 ${showHistory ? (historyOpen ? "md:pr-80" : "md:pr-[3.75rem]") : ""}`}>
         <Header onOpenHistory={showHistory ? () => setHistoryOpen(true) : undefined} />
         <main className="flex-1">
           <section className="mx-auto mt-6 max-w-5xl space-y-6 px-4">

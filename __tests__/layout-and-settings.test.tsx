@@ -8,7 +8,7 @@ import SettingsDialog from '@/components/settings/SettingsDialog';
 import { enMessages } from '@/i18n/en';
 import { ptMessages } from '@/i18n/pt';
 
-const mocks = vi.hoisted(() => ({ language: 'en' as 'en' | 'pt', preset: 'custom' }));
+const mocks = vi.hoisted(() => ({ language: 'en' as 'en' | 'pt', preset: 'custom', isFirstVisit: false }));
 
 vi.mock('@/context/LanguageContext', () => ({
   LanguageProvider: ({ children }: { children: React.ReactNode }) => children,
@@ -24,6 +24,8 @@ vi.mock('@/context/ConfigContext', () => ({
     soundEnabled: true, setSoundEnabled: vi.fn(), soundVolume: 70, setSoundVolume: vi.fn(),
     musicVolume: 50, setMusicVolume: vi.fn(), autoPlay: false, setAutoPlay: vi.fn(),
     showBreakTips: true, setShowBreakTips: vi.fn(),
+    interfaceMode: 'advanced', setInterfaceMode: vi.fn(), askForOccasionalFeedback: true, setAskForOccasionalFeedback: vi.fn(),
+    isFirstVisit: mocks.isFirstVisit,
   }),
 }));
 vi.mock('@/context/TimerContext', () => ({
@@ -44,14 +46,22 @@ describe('navigation and sticky footer shell', () => {
     expect(screen.queryByText('Android App')).not.toBeInTheDocument();
   });
 
+  it('opens settings automatically for a first-time visitor', async () => {
+    mocks.isFirstVisit = true;
+    render(<Header />);
+    expect(await screen.findByRole('dialog', { name: 'Settings' })).toBeInTheDocument();
+    mocks.isFirstVisit = false;
+  });
+
   it('renders a semantic sticky-footer structure without fixing the footer', () => {
     const { container } = render(<MainTemplate><p>About content</p></MainTemplate>);
-    const shell = container.querySelector('.min-h-dvh.flex.flex-col');
+    const shell = container.querySelector('.min-h-screen.flex.flex-col');
     const main = shell?.querySelector(':scope > main');
     const footer = shell?.querySelector(':scope > footer');
     expect(shell).toBeInTheDocument();
     expect(main).toHaveClass('flex-1');
     expect(main?.nextElementSibling).toBe(footer);
+    expect(footer).toHaveClass('mt-auto');
     expect(footer).not.toHaveClass('fixed');
   });
 });

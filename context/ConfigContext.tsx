@@ -8,9 +8,10 @@ import { ProductAnalytics } from '@/application/ports/product-analytics';
 import { NoopProductAnalytics } from '@/infrastructure/analytics/noop-product-analytics';
 
 const DEFAULT_CONFIG: Required<PersistedConfig> = {
-  activePlaylist: 'gregorian', soundEnabled: true, autoPlay: true, soundVolume: 80, musicVolume: 80, showBreakTips: true, interfaceMode: 'simple', askForOccasionalFeedback: true,
+  activePlaylist: 'gregorian', soundEnabled: true, autoPlay: true, soundVolume: 25, musicVolume: 25, showBreakTips: true, interfaceMode: 'simple', askForOccasionalFeedback: true,
 };
 interface ConfigContextType extends Required<PersistedConfig> {
+  isFirstVisit: boolean;
   setAutoPlay(value: boolean): void;
   setSoundVolume(value: number): void;
   setMusicVolume(value: number): void;
@@ -25,14 +26,16 @@ const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
 export function ConfigProvider({ children, repository = defaultConfigRepository, analytics = new NoopProductAnalytics() }: { children: ReactNode; repository?: ConfigRepository; analytics?: ProductAnalytics }) {
   const [config, setConfig] = useState(DEFAULT_CONFIG);
   const [hydrated, setHydrated] = useState(false);
+  const [isFirstVisit, setIsFirstVisit] = useState(false);
   useEffect(() => {
     const stored = repository.load();
+    setIsFirstVisit(stored === null);
     if (stored) setConfig({ ...stored, askForOccasionalFeedback: stored.askForOccasionalFeedback ?? true });
     setHydrated(true);
   }, [repository]);
   useEffect(() => { if (hydrated) repository.save(config); }, [config, hydrated, repository]);
   const update = <K extends keyof PersistedConfig>(key: K, value: PersistedConfig[K]) => setConfig((current) => ({ ...current, [key]: value }));
-  return <ConfigContext.Provider value={{ ...config,
+  return <ConfigContext.Provider value={{ ...config, isFirstVisit,
     setAutoPlay: (value) => update('autoPlay', value), setSoundVolume: (value) => update('soundVolume', value),
     setMusicVolume: (value) => update('musicVolume', value), setActivePlaylist: (value) => update('activePlaylist', value),
     setSoundEnabled: (value) => update('soundEnabled', value),

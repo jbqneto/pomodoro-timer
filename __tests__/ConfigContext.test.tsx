@@ -18,10 +18,12 @@ describe('ConfigContext', () => {
     const { result } = renderHook(() => useConfig(), { wrapper })
     expect(result.current.soundEnabled).toBe(true)
     expect(result.current.autoPlay).toBe(true)
-    expect(result.current.soundVolume).toBe(80)
+    expect(result.current.soundVolume).toBe(25)
+    expect(result.current.musicVolume).toBe(25)
     expect(result.current.activePlaylist).toBe('gregorian')
     expect(result.current.showBreakTips).toBe(true)
     expect(result.current.interfaceMode).toBe('simple')
+    expect(result.current.isFirstVisit).toBe(true)
   })
 
   it('persists interface mode changes', async () => {
@@ -46,6 +48,7 @@ describe('ConfigContext', () => {
       expect(result.current.soundVolume).toBe(50)
       expect(result.current.activePlaylist).toBe('lofi')
       expect(result.current.showBreakTips).toBe(false)
+      expect(result.current.isFirstVisit).toBe(false)
     })
   })
 
@@ -68,7 +71,7 @@ describe('ConfigContext', () => {
     await waitFor(() => {
       // Defaults should remain intact despite corrupt data
       expect(result.current.soundEnabled).toBe(true)
-      expect(result.current.soundVolume).toBe(80)
+      expect(result.current.soundVolume).toBe(25)
     })
 
     // localStorage should contain valid JSON (corrupt entry was replaced by defaults)

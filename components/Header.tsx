@@ -1,7 +1,7 @@
 "use client"
 
 import { useLanguage } from "@/context/LanguageContext";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SettingsDialog from "./settings/SettingsDialog";
 import Link from "next/link";
 import { History } from "lucide-react";
@@ -13,11 +13,15 @@ type HeaderProps = {
 
 export default function Header({ onOpenHistory }: HeaderProps) {
   const { t,language, setLanguage } = useLanguage();
-  const { interfaceMode } = useConfig();
+  const { interfaceMode, isFirstVisit } = useConfig();
   const showHistory = interfaceMode !== 'simple';
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const settingsOpener = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    if (isFirstVisit) setOpen(true);
+  }, [isFirstVisit]);
 
   const openSettings = (event: React.MouseEvent<HTMLButtonElement>) => {
     settingsOpener.current = event.currentTarget;
