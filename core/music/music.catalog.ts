@@ -2,7 +2,7 @@ import { MusicOption, MusicOptionId, MusicSource, OfficialMusicOptionId } from '
 
 const options: readonly MusicOption[] = [
   { id: 'silence', source: { type: 'silence' } },
-  { id: 'gregorian', source: { type: 'youtube-playlist', playlistId: 'PLgRDBI6ZEX_zsw_JKMy_lEyXvvNENoEyr' } },
+  { id: 'gregorian', source: { type: 'youtube-playlist', playlistId: 'PLJlsswtn0fa0' } },
   { id: 'classical', source: { type: 'youtube-playlist', playlistId: 'PLgRDBI6ZEX_ztab0cICj_wIqo1GHjtzDd' } },
   { id: 'lofi', source: { type: 'youtube-playlist', playlistId: 'PLgRDBI6ZEX_yqpTYSAgshj_vjoaMs0GP8' } },
 ];
