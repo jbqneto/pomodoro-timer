@@ -40,6 +40,7 @@ export function TimerProvider({ children, storage = defaultTimerStorage, clock =
   const [history, setHistory] = useState<SessionHistoryStorage>({ date: getLocalDateKey(new Date(clock.now())), sessions: [] });
   const [hydrated, setHydrated] = useState(false);
   const alarmRef = useRef<HTMLAudioElement | null>(null);
+  const alarmTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const endAtRef = useRef<number | null>(null);
   const startedAtRef = useRef<number | null>(null);
@@ -102,7 +103,13 @@ export function TimerProvider({ children, storage = defaultTimerStorage, clock =
   useEffect(() => {
     if (seconds !== 0 || state !== 'running') return;
     clearTick(); setState('idle');
-    if (soundEnabled && alarmRef.current) alarmRef.current.play().catch((error) => console.error('Error playing alarm sound:', error));
+    if (soundEnabled && alarmRef.current) {
+      if (alarmTimeoutRef.current) clearTimeout(alarmTimeoutRef.current);
+      alarmTimeoutRef.current = setTimeout(() => {
+        alarmRef.current?.play().catch((error) => console.error('Error playing alarm sound:', error));
+        alarmTimeoutRef.current = null;
+      }, 1000);
+    }
     const completedAt = new Date(clock.now());
     const durationMinutes = getPhaseDurationMinutes({ phase, session, preset, customPreset });
     const entry: SessionHistoryEntry = { id: `${clock.now()}-${Math.random().toString(36).slice(2, 8)}`,
@@ -121,6 +128,9 @@ export function TimerProvider({ children, storage = defaultTimerStorage, clock =
     return () => document.removeEventListener('visibilitychange', sync);
   }, [clock]);
   useEffect(() => clearTick, [clearTick]);
+  useEffect(() => () => {
+    if (alarmTimeoutRef.current) clearTimeout(alarmTimeoutRef.current);
+  }, []);
 
   return <TimerContext.Provider value={{ minutes: Math.floor(seconds / 60), seconds: seconds % 60, state, phase, session,
     preset, customPreset, task, isTaskLocked, sessionHistory: history.sessions, sessionHistoryDate: history.date,
