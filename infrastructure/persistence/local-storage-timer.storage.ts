@@ -4,6 +4,7 @@ import { PersistedTimerData, SessionHistoryEntry, SessionHistoryStorage, TimerSt
 export const TIMER_STORAGE_KEYS = {
   customPreset: 'focus-timer-custom-preset', task: 'focus-timer-current-task',
   taskLocked: 'focus-timer-current-task-locked', history: 'focus-timer-session-history',
+  dailyNote: 'focus-timer-daily-note',
 } as const;
 export const MAX_HISTORY_ENTRIES = 100;
 export const MAX_TASK_LENGTH = 160;
@@ -80,6 +81,12 @@ export class LocalStorageTimerStorage implements TimerStorage {
   }
   saveHistory(value: SessionHistoryStorage): void { this.storage.setItem(TIMER_STORAGE_KEYS.history, JSON.stringify(value)); }
   clearHistory(): void { this.storage.removeItem(TIMER_STORAGE_KEYS.history); }
+  loadDailyNote(date: string): string | null {
+    const raw = this.storage.getItem(`${TIMER_STORAGE_KEYS.dailyNote}-${date}`);
+    return raw ?? null;
+  }
+  saveDailyNote(date: string, note: string): void { this.storage.setItem(`${TIMER_STORAGE_KEYS.dailyNote}-${date}`, note); }
+  clearDailyNote(date: string): void { this.storage.removeItem(`${TIMER_STORAGE_KEYS.dailyNote}-${date}`); }
 }
 export const defaultTimerStorage: TimerStorage = {
   load: () => typeof window === 'undefined' ? { customPreset: null, task: '', isTaskLocked: false, history: null } : new LocalStorageTimerStorage(window.localStorage).load(),
@@ -87,4 +94,7 @@ export const defaultTimerStorage: TimerStorage = {
   saveTask: (v, l) => { if (typeof window !== 'undefined') new LocalStorageTimerStorage(window.localStorage).saveTask(v, l); },
   saveHistory: (v) => { if (typeof window !== 'undefined') new LocalStorageTimerStorage(window.localStorage).saveHistory(v); },
   clearHistory: () => { if (typeof window !== 'undefined') new LocalStorageTimerStorage(window.localStorage).clearHistory(); },
+  loadDailyNote: (date) => { if (typeof window !== 'undefined') return new LocalStorageTimerStorage(window.localStorage).loadDailyNote(date); return null; },
+  saveDailyNote: (date, note) => { if (typeof window !== 'undefined') new LocalStorageTimerStorage(window.localStorage).saveDailyNote(date, note); },
+  clearDailyNote: (date) => { if (typeof window !== 'undefined') new LocalStorageTimerStorage(window.localStorage).clearDailyNote(date); },
 };

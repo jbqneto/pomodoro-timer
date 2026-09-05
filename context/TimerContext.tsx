@@ -20,9 +20,11 @@ interface TimerContextType {
   minutes: number; seconds: number; state: TimerStatus; phase: TimerPhase; session: number;
   preset: TimerPreset; customPreset: PresetSettings; task: string; isTaskLocked: boolean;
   sessionHistory: SessionHistoryEntry[]; sessionHistoryDate: string;
-  startTimer(): void; pauseTimer(): void; resumeTimer(): void; stopTimer(): void;
+  nextDayNote: string | null; showNextDayNote: boolean;
+  startTimer(): void; pauseTimer(): void; resumeTimer(): void; stopTimer(): void; endDay(note: string): void;
   setPreset(value: TimerPreset): void; setCustomPreset(value: PresetSettings): void;
   setTask(value: string): void; setTaskLocked(value: boolean): void; clearSessionHistory(): void;
+  dismissNextDayNote(): void;
 }
 const TimerContext = createContext<TimerContextType | undefined>(undefined);
 
@@ -39,6 +41,9 @@ export function TimerProvider({ children, storage = defaultTimerStorage, clock =
   const [isTaskLocked, setTaskLockedState] = useState(false);
   const [history, setHistory] = useState<SessionHistoryStorage>({ date: getLocalDateKey(new Date(clock.now())), sessions: [] });
   const [hydrated, setHydrated] = useState(false);
+  const [nextDayNote, setNextDayNote] = useState<string | null>(null);
+  const [showNextDayNote, setShowNextDayNote] = useState(false);
+  const [dayStarted, setDayStarted] = useState(false);
   const alarmRef = useRef<HTMLAudioElement | null>(null);
   const alarmTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -55,6 +60,7 @@ export function TimerProvider({ children, storage = defaultTimerStorage, clock =
     const now = clock.now();
     const today = getLocalDateKey(new Date(now));
     setHistory((current) => current.date === today ? current : { date: today, sessions: [] });
+    if (!dayStarted) { setDayStarted(true); }
     if (state === 'idle') {
       startedAtRef.current = now;
       if (phase === 'focus') { try { analytics.track({name:'focus_started',properties:toFocusEventProperties(preset,customPreset,activePlaylist,interfaceMode)}); } catch {} }
@@ -64,7 +70,7 @@ export function TimerProvider({ children, storage = defaultTimerStorage, clock =
     setState('running');
     const tick = () => { const remaining = calculateRemainingSeconds(endAt, clock.now()); secondsRef.current = remaining; setSeconds(remaining); };
     intervalRef.current = setInterval(tick, 1000);
-  }, [activePlaylist, analytics, clock, customPreset, interfaceMode, phase, preset, state]);
+  }, [activePlaylist, analytics, clock, customPreset, interfaceMode, phase, preset, state, dayStarted]);
   const pauseTimer = useCallback(() => {
     if (endAtRef.current !== null) { const remaining = calculateRemainingSeconds(endAtRef.current, clock.now()); secondsRef.current = remaining; setSeconds(remaining); }
     clearTick(); setState('paused');
@@ -87,13 +93,35 @@ export function TimerProvider({ children, storage = defaultTimerStorage, clock =
     if (state === 'idle') { secondsRef.current = value.focus * 60; setPresetState('custom'); setPhase('focus'); setSeconds(secondsRef.current); }
   }, [state]);
 
+  const endDay = useCallback((note: string) => {
+    const today = getLocalDateKey(new Date(clock.now()));
+    if (note.trim()) storage.saveDailyNote(today, note.trim());
+    clearTick();
+    startedAtRef.current = null;
+    const reset = abandonCycle({ preset, customPreset });
+    secondsRef.current = reset.durationMinutes * 60;
+    setState(reset.status); setPhase(reset.phase); setSession(reset.session); setSeconds(secondsRef.current);
+    setShowNextDayNote(false);
+    setNextDayNote(null);
+  }, [clearTick, clock, customPreset, preset, state, storage]);
+
+  const dismissNextDayNote = useCallback(() => {
+    setShowNextDayNote(false);
+    setNextDayNote(null);
+    const today = getLocalDateKey(new Date(clock.now()));
+    storage.clearDailyNote(today);
+  }, [clock, storage]);
+
   useEffect(() => {
     const stored = storage.load();
     if (stored.customPreset) setCustomPresetState(stored.customPreset);
     setTaskState(stored.task); setTaskLockedState(stored.isTaskLocked);
     if (stored.history) setHistory(stored.history);
+    const today = getLocalDateKey(new Date(clock.now()));
+    const note = storage.loadDailyNote(today);
+    if (note) { setNextDayNote(note); setShowNextDayNote(true); }
     setHydrated(true);
-  }, [storage]);
+  }, [storage, clock]);
   useEffect(() => { if (hydrated) storage.saveCustomPreset(customPreset); }, [customPreset, hydrated, storage]);
   useEffect(() => { if (hydrated) storage.saveTask(task, isTaskLocked); }, [hydrated, isTaskLocked, storage, task]);
   useEffect(() => { if (hydrated) storage.saveHistory(history); }, [history, hydrated, storage]);
@@ -134,8 +162,9 @@ export function TimerProvider({ children, storage = defaultTimerStorage, clock =
 
   return <TimerContext.Provider value={{ minutes: Math.floor(seconds / 60), seconds: seconds % 60, state, phase, session,
     preset, customPreset, task, isTaskLocked, sessionHistory: history.sessions, sessionHistoryDate: history.date,
+    nextDayNote, showNextDayNote,
     startTimer, pauseTimer, resumeTimer: startTimer,
-    stopTimer, // Compatibility: existing controls consume this name for abandoning the cycle.
+    stopTimer, endDay, dismissNextDayNote,
     setPreset, setCustomPreset, setTask: (value) => setTaskState(value.slice(0, MAX_TASK_LENGTH)),
     setTaskLocked: setTaskLockedState, clearSessionHistory: () => setHistory((current) => ({ ...current, sessions: [] })),
   }}>{children}<audio ref={alarmRef} src="/sounds/alarm-clock.mp3" preload="auto" playsInline className="hidden" /></TimerContext.Provider>;

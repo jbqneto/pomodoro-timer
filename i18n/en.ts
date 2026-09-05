@@ -111,6 +111,20 @@ export const enMessages = {
     advancedModeDescription: 'Full music controls, custom timer settings, and session history.',
     customPresetActiveNotice: 'A custom preset is currently active. Select a standard preset to replace it.',
 
+    // End Day
+    endDay: 'End day',
+    endDayTitle: 'Day summary',
+    endDayWorkTime: 'Work time',
+    endDayBreakTime: 'Break time',
+    endDayTasksCompleted: 'Tasks completed',
+    endDaySessionsCompleted: 'Sessions completed',
+    endDayNoteLabel: "Note for tomorrow",
+    endDayNotePlaceholder: 'Leave a note for yourself tomorrow...',
+    endDaySave: 'Save and end day',
+    endDayCancel: 'Cancel',
+    nextDayNoteTitle: "Yesterday's note",
+    nextDayNoteConfirm: 'Got it, continue',
+
     // About
     aboutTitle: 'Why Focus Beat exists',
     aboutIntro: 'This project combines structured work intervals with background music to create a calm and practical focus space.',

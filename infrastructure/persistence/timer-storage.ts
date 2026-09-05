@@ -10,4 +10,7 @@ export interface TimerStorage {
   saveTask(value: string, locked: boolean): void;
   saveHistory(value: SessionHistoryStorage): void;
   clearHistory(): void;
+  loadDailyNote(date: string): string | null;
+  saveDailyNote(date: string, note: string): void;
+  clearDailyNote(date: string): void;
 }
