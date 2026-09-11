@@ -72,6 +72,9 @@ export const enMessages = {
     customPlaylistPlaceholder: 'https://www.youtube.com/watch?v=…',
     customPlaylistInvalidUrl: 'Enter a valid YouTube video or playlist link.',
     saveCustomPlaylist: 'Use this playlist',
+    visitPlaylist: 'Visit playlist',
+    visitVideo: 'Watch video',
+    exploreSource: 'Explore source',
     
     // Footer
     disclaimer: 'Made for focused work with timed sessions and background music.',

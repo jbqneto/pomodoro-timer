@@ -8,7 +8,7 @@ import { useTimer } from "@/context/TimerContext";
 import { getMusicOptions, getMusicSource } from "@/core/music/music.catalog";
 import { MusicOptionId, MusicSource } from "@/core/music/music.types";
 import { parseYouTubeUrl } from "@/core/music/youtube-url";
-import { ChevronDown, Music4, Pause, Play, SkipBack, SkipForward, Volume2 } from "lucide-react";
+import { ChevronDown, ExternalLink, Music4, Pause, Play, SkipBack, SkipForward, Volume2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
 
@@ -113,6 +113,23 @@ export default function MusicMiniCard({ showTrackNavigation = true }: { showTrac
   const hasYouTubeSource = selectedSource.type !== 'silence';
   const controlsDisabled = !hasYouTubeSource || consent !== 'granted';
   const canNavigateTracks = selectedSource.type === 'youtube-playlist';
+  const navigableSource = hasYouTubeSource ? selectedSource : null;
+
+  function visitUrl(source: MusicSource): string {
+    if (source.type === 'youtube-playlist') {
+      return `https://www.youtube.com/playlist?list=${source.playlistId}`;
+    }
+    if (source.type === 'youtube-video') {
+      return `https://www.youtube.com/watch?v=${source.videoId}`;
+    }
+    return 'https://www.youtube.com';
+  }
+
+  function navigationLabel(source: MusicSource, t: (key: string) => string): string {
+    if (source.type === 'youtube-playlist') return t('visitPlaylist');
+    if (source.type === 'youtube-video') return t('visitVideo');
+    return t('exploreSource');
+  }
 
   return (
     <TooltipProvider delayDuration={120}>
@@ -245,6 +262,19 @@ export default function MusicMiniCard({ showTrackNavigation = true }: { showTrac
             {musicVolume}
           </span>
         </div>
+
+        <a
+          href={navigableSource ? visitUrl(navigableSource) : undefined}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-neutral-400 transition-all duration-200 hover:bg-white/10 hover:text-white hover:border-white/20 focus-ring focus:border-sky-400/50 focus:text-white disabled:pointer-events-none"
+          aria-label={navigableSource ? navigationLabel(navigableSource, t) : undefined}
+          tabIndex={navigableSource ? 0 : -1}
+          aria-disabled={navigableSource ? undefined : true}
+        >
+          <ExternalLink className="h-4 w-4 text-neutral-500" />
+          {navigableSource ? navigationLabel(navigableSource, t) : t('exploreSource')}
+        </a>
 
       </section>
 

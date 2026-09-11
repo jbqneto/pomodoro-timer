@@ -73,7 +73,10 @@ export const ptMessages = {
     customPlaylistUrl: 'Link do YouTube',
     customPlaylistPlaceholder: 'https://www.youtube.com/watch?v=…',
     customPlaylistInvalidUrl: 'Insira um link válido de vídeo ou playlist do YouTube.',
-    saveCustomPlaylist: 'Usar esta playlist',
+    saveCustomPlaylist: 'Use esta playlist',
+    visitPlaylist: 'Visitar playlist',
+    visitVideo: 'Ver vídeo',
+    exploreSource: 'Explorar fonte',
     
     // Footer
     disclaimer: 'Feito para trabalho focado com sessões temporizadas e música de fundo.',
