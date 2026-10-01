@@ -66,4 +66,20 @@ describe('localStorage adapters', () => {
     expect(localStorage.getItem(TIMER_STORAGE_KEYS.task)).toBe('task');
     storage.clearHistory(); expect(localStorage.getItem(TIMER_STORAGE_KEYS.history)).toBeNull();
   });
+  it('loads the most recent daily note from a day before the given date', () => {
+    const storage = new LocalStorageTimerStorage(localStorage);
+    storage.saveDailyNote('2026-09-28', 'older');
+    storage.saveDailyNote('2026-09-30', 'yesterday');
+    storage.saveDailyNote('2026-10-01', 'today');
+    expect(storage.loadLatestDailyNote('2026-10-01')).toEqual({ date: '2026-09-30', note: 'yesterday' });
+    expect(storage.loadLatestDailyNote('2026-09-28')).toBeNull();
+    storage.clearDailyNote('2026-09-30');
+    expect(storage.loadLatestDailyNote('2026-10-01')).toEqual({ date: '2026-09-28', note: 'older' });
+  });
+  it('ignores unrelated keys and malformed dates when loading the latest daily note', () => {
+    const storage = new LocalStorageTimerStorage(localStorage);
+    localStorage.setItem(`${TIMER_STORAGE_KEYS.dailyNote}-garbage`, 'x');
+    localStorage.setItem('other-key-2026-09-30', 'x');
+    expect(storage.loadLatestDailyNote('2026-10-01')).toBeNull();
+  });
 });

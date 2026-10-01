@@ -44,6 +44,7 @@ export function TimerProvider({ children, storage = defaultTimerStorage, clock =
   const [nextDayNote, setNextDayNote] = useState<string | null>(null);
   const [showNextDayNote, setShowNextDayNote] = useState(false);
   const [dayStarted, setDayStarted] = useState(false);
+  const pendingNoteRef = useRef<{ date: string; note: string } | null>(null);
   const alarmRef = useRef<HTMLAudioElement | null>(null);
   const alarmTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -61,6 +62,7 @@ export function TimerProvider({ children, storage = defaultTimerStorage, clock =
     const today = getLocalDateKey(new Date(now));
     setHistory((current) => current.date === today ? current : { date: today, sessions: [] });
     if (!dayStarted) { setDayStarted(true); }
+    if (pendingNoteRef.current) { setNextDayNote(pendingNoteRef.current.note); setShowNextDayNote(true); }
     if (state === 'idle') {
       startedAtRef.current = now;
       if (phase === 'focus') { try { analytics.track({name:'focus_started',properties:toFocusEventProperties(preset,customPreset,activePlaylist,interfaceMode)}); } catch {} }
@@ -108,9 +110,9 @@ export function TimerProvider({ children, storage = defaultTimerStorage, clock =
   const dismissNextDayNote = useCallback(() => {
     setShowNextDayNote(false);
     setNextDayNote(null);
-    const today = getLocalDateKey(new Date(clock.now()));
-    storage.clearDailyNote(today);
-  }, [clock, storage]);
+    if (pendingNoteRef.current) storage.clearDailyNote(pendingNoteRef.current.date);
+    pendingNoteRef.current = null;
+  }, [storage]);
 
   useEffect(() => {
     const stored = storage.load();
@@ -118,8 +120,7 @@ export function TimerProvider({ children, storage = defaultTimerStorage, clock =
     setTaskState(stored.task); setTaskLockedState(stored.isTaskLocked);
     if (stored.history) setHistory(stored.history);
     const today = getLocalDateKey(new Date(clock.now()));
-    const note = storage.loadDailyNote(today);
-    if (note) { setNextDayNote(note); setShowNextDayNote(true); }
+    pendingNoteRef.current = storage.loadLatestDailyNote(today);
     setHydrated(true);
   }, [storage, clock]);
   useEffect(() => { if (hydrated) storage.saveCustomPreset(customPreset); }, [customPreset, hydrated, storage]);

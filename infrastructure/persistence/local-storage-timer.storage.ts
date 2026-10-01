@@ -85,6 +85,19 @@ export class LocalStorageTimerStorage implements TimerStorage {
     const raw = this.storage.getItem(`${TIMER_STORAGE_KEYS.dailyNote}-${date}`);
     return raw ?? null;
   }
+  loadLatestDailyNote(before: string): { date: string; note: string } | null {
+    const prefix = `${TIMER_STORAGE_KEYS.dailyNote}-`;
+    let latest: { date: string; note: string } | null = null;
+    for (let i = 0; i < this.storage.length; i++) {
+      const key = this.storage.key(i);
+      if (!key?.startsWith(prefix)) continue;
+      const date = key.slice(prefix.length);
+      if (!validDateKey(date) || date >= before || (latest && date <= latest.date)) continue;
+      const note = this.storage.getItem(key);
+      if (note) latest = { date, note };
+    }
+    return latest;
+  }
   saveDailyNote(date: string, note: string): void { this.storage.setItem(`${TIMER_STORAGE_KEYS.dailyNote}-${date}`, note); }
   clearDailyNote(date: string): void { this.storage.removeItem(`${TIMER_STORAGE_KEYS.dailyNote}-${date}`); }
 }
@@ -95,6 +108,7 @@ export const defaultTimerStorage: TimerStorage = {
   saveHistory: (v) => { if (typeof window !== 'undefined') new LocalStorageTimerStorage(window.localStorage).saveHistory(v); },
   clearHistory: () => { if (typeof window !== 'undefined') new LocalStorageTimerStorage(window.localStorage).clearHistory(); },
   loadDailyNote: (date) => { if (typeof window !== 'undefined') return new LocalStorageTimerStorage(window.localStorage).loadDailyNote(date); return null; },
+  loadLatestDailyNote: (before) => { if (typeof window !== 'undefined') return new LocalStorageTimerStorage(window.localStorage).loadLatestDailyNote(before); return null; },
   saveDailyNote: (date, note) => { if (typeof window !== 'undefined') new LocalStorageTimerStorage(window.localStorage).saveDailyNote(date, note); },
   clearDailyNote: (date) => { if (typeof window !== 'undefined') new LocalStorageTimerStorage(window.localStorage).clearDailyNote(date); },
 };
