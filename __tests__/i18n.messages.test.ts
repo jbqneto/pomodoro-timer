@@ -9,6 +9,12 @@ describe('translation dictionaries', () => {
     expect(ptMessages.gregorian).toBe('Cantos Gregorianos');
     expect(enMessages.expandHistory).toBe('Expand session history');
     expect(ptMessages.youtubeConsentTitle).toBe('Consentimento do player do YouTube');
+    expect(enMessages.afterhours).toBe('Instrumental Jazz');
+    expect(ptMessages.afterhours).toBe('Jazz Instrumental');
+    expect(enMessages.afterhoursSubtitle).toContain('jazz');
+    expect(ptMessages.jazzDescription).toContain('jazz instrumental');
+    expect(enMessages.heroDescription).toContain('instrumental jazz');
+    expect(ptMessages.seoMusicDescription).toContain('jazz instrumental');
   });
   it('contain all break-tip copy in both languages', () => {
     const keys = ['breakTipTitle', 'showBreakTips', 'breakTipStand', 'breakTipEyes', 'breakTipStretch', 'breakTipWater',

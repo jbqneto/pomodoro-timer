@@ -13,21 +13,21 @@ const copy: Record<Language, Record<PageKind, { title: string; description: stri
   en: {
     home: {
       title: 'Free Pomodoro Timer with Music',
-      description: 'Free online Pomodoro timer for work and study. Focus with 25/5 sessions, custom breaks and optional lo-fi, classical or Gregorian music.',
+      description: 'Free Pomodoro timer for work and study. Use 25/5 cycles and optional instrumental jazz, lo-fi, classical or Gregorian music.',
     },
     about: {
       title: 'About Focus Beat',
-      description: 'Learn how Focus Beat combines Pomodoro focus sessions, optional background music and local-only activity history.',
+      description: 'Explore Focus Beat: Pomodoro sessions, instrumental jazz, lo-fi, classical and Gregorian playlists, and browser-only activity history.',
     },
   },
   pt: {
     home: {
       title: 'Timer Pomodoro Online Grátis com Música',
-      description: 'Timer Pomodoro grátis para estudar e trabalhar. Faça ciclos 25/5, configure pausas e escolha música lo-fi, clássica ou gregoriana.',
+      description: 'Timer Pomodoro grátis para estudar e trabalhar: ciclos 25/5 e músicas de jazz instrumental, lo-fi, clássica ou gregoriana.',
     },
     about: {
       title: 'Sobre o Focus Beat',
-      description: 'Conheça o Focus Beat: sessões Pomodoro, música de fundo opcional e histórico de atividades salvo apenas no navegador.',
+      description: 'Conheça o Focus Beat: sessões Pomodoro, jazz instrumental, lo-fi, música clássica, canto gregoriano e histórico local.',
     },
   },
 };
