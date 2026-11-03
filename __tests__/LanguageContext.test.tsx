@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { renderHook, act } from '@testing-library/react'
 import React from 'react'
 import { LanguageProvider, useLanguage } from '@/context/LanguageContext'
 
@@ -40,12 +40,18 @@ describe('LanguageContext', () => {
     expect(result.current.t('key.that.does.not.exist')).toBe('key.that.does.not.exist')
   })
 
-  it('loads language from localStorage on mount', async () => {
+  it('does not allow a stored language to override the canonical URL language', () => {
     localStorage.setItem(STORAGE_KEY, 'pt')
     const { result } = renderHook(() => useLanguage(), { wrapper })
-    await waitFor(() => {
-      expect(result.current.language).toBe('pt')
-    })
+    expect(result.current.language).toBe('en')
+  })
+
+  it('renders Portuguese immediately for a Portuguese route', () => {
+    const ptWrapper = ({ children }: { children: React.ReactNode }) =>
+      <LanguageProvider initialLanguage="pt">{children}</LanguageProvider>
+    const { result } = renderHook(() => useLanguage(), { wrapper: ptWrapper })
+    expect(result.current.language).toBe('pt')
+    expect(result.current.t('focus')).toBe('Foco')
   })
 
   it('persists language choice to localStorage', () => {

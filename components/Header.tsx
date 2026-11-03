@@ -9,12 +9,17 @@ import { useConfig } from "@/context/ConfigContext";
 
 type HeaderProps = {
   onOpenHistory?: () => void;
+  page?: 'home' | 'about';
 };
 
-export default function Header({ onOpenHistory }: HeaderProps) {
-  const { t,language, setLanguage } = useLanguage();
+export default function Header({ onOpenHistory, page = 'home' }: HeaderProps) {
+  const { t,language } = useLanguage();
   const { interfaceMode, isFirstVisit } = useConfig();
   const showHistory = interfaceMode !== 'simple';
+  const homeHref = language === 'pt' ? '/pt' : '/';
+  const aboutHref = language === 'pt' ? '/pt/about' : '/about';
+  const englishHref = page === 'about' ? '/about' : '/';
+  const portugueseHref = page === 'about' ? '/pt/about' : '/pt';
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const settingsOpener = useRef<HTMLButtonElement | null>(null);
@@ -43,25 +48,13 @@ export default function Header({ onOpenHistory }: HeaderProps) {
 
         {/* Desktop nav */}
         <nav className="hidden items-center gap-4 md:flex">
-          <Link className="text-sm text-neutral-300 hover:text-white" href="/">{t('home')}</Link>
-          <Link className="text-sm text-neutral-300 hover:text-white" href="/about">{ t('about') }</Link>
+          <Link className="text-sm text-neutral-300 hover:text-white" href={homeHref}>{t('home')}</Link>
+          <Link className="text-sm text-neutral-300 hover:text-white" href={aboutHref}>{ t('about') }</Link>
 
           {/* Lang switch */}
           <div className="ml-2 inline-flex overflow-hidden rounded-full border border-white/10">
-            <button
-              className={`px-3 py-1 text-sm ${language === "en" ? "bg-sky-500 text-white" : "text-neutral-200 hover:bg-white/5"}`}
-              onClick={() => setLanguage("en")}
-              aria-label="Switch to English"
-            >
-              EN
-            </button>
-            <button
-              className={`px-3 py-1 text-sm ${language === "pt" ? "bg-sky-500 text-white" : "text-neutral-200 hover:bg-white/5"}`}
-              onClick={() => setLanguage("pt")}
-              aria-label="Mudar para Português"
-            >
-              PT
-            </button>
+            <Link href={englishHref} hrefLang="en" aria-label="Switch to English" className={language === 'en' ? 'bg-sky-500 px-3 py-1 text-sm text-white' : 'px-3 py-1 text-sm text-neutral-200 hover:bg-white/5'}>EN</Link>
+            <Link href={portugueseHref} hrefLang="pt-BR" aria-label="Mudar para Português" className={language === 'pt' ? 'bg-sky-500 px-3 py-1 text-sm text-white' : 'px-3 py-1 text-sm text-neutral-200 hover:bg-white/5'}>PT</Link>
           </div>
 
           {/* Settings gear */}
@@ -88,8 +81,8 @@ export default function Header({ onOpenHistory }: HeaderProps) {
       {menuOpen && (
         <div className="absolute inset-x-0 top-full z-50 border-b border-white/10 bg-neutral-950/95 shadow-2xl backdrop-blur md:hidden">
           <div className="mx-auto flex max-w-5xl flex-col gap-2 px-4 py-3">
-            <Link className="text-sm text-neutral-200" href="/" onClick={()=>setMenuOpen(false)}>{t('home')}</Link>
-            <Link className="text-sm text-neutral-200" href="/about" onClick={()=>setMenuOpen(false)}>{t('about')}</Link>
+            <Link className="text-sm text-neutral-200" href={homeHref} onClick={()=>setMenuOpen(false)}>{t('home')}</Link>
+            <Link className="text-sm text-neutral-200" href={aboutHref} onClick={()=>setMenuOpen(false)}>{t('about')}</Link>
 
             {showHistory && onOpenHistory && (
               <button
@@ -108,8 +101,8 @@ export default function Header({ onOpenHistory }: HeaderProps) {
             <div className="flex items-center gap-2">
               <span className="text-sm text-neutral-400">{t('language')}</span>
               <div className="inline-flex overflow-hidden rounded-full border border-white/10">
-                <button className={`px-3 py-1 text-sm ${language==="en"?"bg-sky-500 text-white":"text-neutral-200"}`} onClick={()=>setLanguage("en")}>EN</button>
-                <button className={`px-3 py-1 text-sm ${language==="pt"?"bg-sky-500 text-white":"text-neutral-200"}`} onClick={()=>setLanguage("pt")}>PT</button>
+                <Link href={englishHref} hrefLang="en" onClick={() => setMenuOpen(false)} className={language === 'en' ? 'bg-sky-500 px-3 py-1 text-sm text-white' : 'px-3 py-1 text-sm text-neutral-200'}>EN</Link>
+                <Link href={portugueseHref} hrefLang="pt-BR" onClick={() => setMenuOpen(false)} className={language === 'pt' ? 'bg-sky-500 px-3 py-1 text-sm text-white' : 'px-3 py-1 text-sm text-neutral-200'}>PT</Link>
               </div>
             </div>
 
