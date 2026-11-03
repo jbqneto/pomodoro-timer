@@ -1,4 +1,4 @@
-export type OfficialMusicOptionId = 'silence' | 'gregorian' | 'classical' | 'lofi';
+export type OfficialMusicOptionId = 'silence' | 'gregorian' | 'classical' | 'lofi' | 'afterhours';
 export type MusicOptionId = OfficialMusicOptionId | 'custom';
 export type MusicSource =
   | { type: 'silence' }

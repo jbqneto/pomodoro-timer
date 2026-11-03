@@ -45,12 +45,14 @@ export const ptMessages = {
     
     // Playlist
     lofi: 'Lo-fi',
+    afterhours: 'After Hours',
     classical: 'Clássica',
     silence: 'Silêncio',
     gregorian: 'Cantos Gregorianos',
     catholic: 'Cantos Gregorianos',
     musicCategory: 'Categoria de música',
     musicSessionLabel: 'Música para a sessão',
+    afterhoursSubtitle: 'Clima moderno de madrugada para foco noturno',
     lofiSubtitle: 'Batidas suaves para foco constante',
     classicalSubtitle: 'Foco instrumental em um ritmo mais calmo',
     catholicSubtitle: 'Cantos contemplativos para sessões longas',

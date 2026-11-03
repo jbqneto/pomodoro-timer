@@ -5,6 +5,7 @@ const options: readonly MusicOption[] = [
   { id: 'gregorian', source: { type: 'youtube-playlist', playlistId: 'PLJlsswtn0fa0' } },
   { id: 'classical', source: { type: 'youtube-playlist', playlistId: 'PLgRDBI6ZEX_ztab0cICj_wIqo1GHjtzDd' } },
   { id: 'lofi', source: { type: 'youtube-playlist', playlistId: 'PLgRDBI6ZEX_yqpTYSAgshj_vjoaMs0GP8' } },
+  { id: 'afterhours', source: { type: 'youtube-playlist', playlistId: 'PLGMEr1MK-Khc' } },
 ];
 
 export function getMusicOptions(): readonly MusicOption[] { return options; }
