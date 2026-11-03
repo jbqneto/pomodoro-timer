@@ -14,6 +14,14 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 
 const YOUTUBE_CONSENT_KEY = "youtube-media-consent";
 const MUSIC_OPTIONS = getMusicOptions();
+const MUSIC_SUBTITLES: Record<MusicOptionId, string> = {
+  silence: 'silenceSubtitle',
+  gregorian: 'catholicSubtitle',
+  classical: 'classicalSubtitle',
+  lofi: 'lofiSubtitle',
+  afterhours: 'afterhoursSubtitle',
+  custom: 'customSubtitle',
+};
 
 export default function MusicMiniCard({ showTrackNavigation = true }: { showTrackNavigation?: boolean }) {
   const { t } = useLanguage();
@@ -140,12 +148,13 @@ export default function MusicMiniCard({ showTrackNavigation = true }: { showTrac
           </div>
 
           <div className="min-w-0">
-            <label htmlFor="music-category" className="sr-only">
+            <label htmlFor="music-category" className="mb-2 block text-left text-xs font-medium uppercase tracking-[0.12em] text-neutral-400">
               {t("musicCategory")}
             </label>
             <div className="group relative rounded-2xl bg-gradient-to-b from-white/[0.08] to-white/[0.02] p-px shadow-[0_14px_32px_-22px_rgba(56,189,248,0.8)]">
               <select
                 id="music-category"
+                aria-describedby="music-category-description"
                 value={activePlaylist}
                 onChange={handlePlaylistChange}
                 className="h-11 w-full appearance-none rounded-[15px] border border-white/10 bg-neutral-950/90 px-4 pr-11 text-sm font-semibold text-neutral-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.07)] outline-none transition-all duration-200 hover:border-sky-300/35 hover:bg-neutral-950 focus:border-sky-300/70 focus:ring-2 focus:ring-sky-400/35"
@@ -162,6 +171,9 @@ export default function MusicMiniCard({ showTrackNavigation = true }: { showTrac
                 className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-sky-300 transition-transform duration-200 group-focus-within:rotate-180"
               />
             </div>
+            <p id="music-category-description" aria-live="polite" className="mt-2 min-h-5 text-left text-xs leading-5 text-neutral-400">
+              {t(MUSIC_SUBTITLES[activePlaylist])}
+            </p>
           </div>
         </div>
 

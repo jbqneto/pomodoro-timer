@@ -6,7 +6,7 @@ Demo: [https://focus.thedevlab.site/](https://focus.thedevlab.site/)
 
 ## Current project status
 
-The current web application provides fixed 25/5 and 15-minute presets, configurable focus and break durations, start/pause/resume/stop controls, alarm and music volume settings, local task text, and daily session history. It offers Gregorian/contemplative, classical, and lo-fi YouTube playlists; users can also use the timer without music.
+The current web application provides fixed 25/5 and 15-minute presets, configurable focus and break durations, start/pause/resume/stop controls, alarm and music volume settings, local task text, and daily session history. It offers instrumental jazz, Gregorian/contemplative, classical, and lo-fi YouTube playlists; users can also use the timer without music.
 
 Configuration, language choice, custom timer settings, task state, YouTube consent, and activity history are kept in the browser. The application has no account or cloud persistence. It is bilingual (English and Portuguese), responsive, tested with Vitest and React Testing Library, and built as a static Next.js export.
 
