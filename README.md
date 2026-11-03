@@ -2,7 +2,7 @@
 
 Focus Beat is a local-first focus and break timer with background music and English and Portuguese content.
 
-Demo: [https://pomodoro-timer-eight-swart.vercel.app/](https://pomodoro-timer-eight-swart.vercel.app/)
+Demo: [https://focus.thedevlab.site/](https://focus.thedevlab.site/)
 
 ## Current project status
 
@@ -57,6 +57,7 @@ Focus Beat is a modular monolith. Its architecture will evolve incrementally: st
 ## Documentation
 
 - [Architecture guide](docs/ARCHITECTURE.md)
+- [SEO and multilingual routing](docs/SEO.md)
 - [Architecture decision records](docs/adr/0001-modular-architecture.md)
 
 Additional operational documents should be linked here when they are added. There is currently no `docs/production-diagnostic.md` in this checkout.

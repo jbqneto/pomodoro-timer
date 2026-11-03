@@ -96,8 +96,8 @@ export const enMessages = {
 
     // Landing copy
     heroEyebrow: 'Focus faster with music',
-    heroTitle: 'One timer. The right music. Real focus.',
-    heroDescription: 'Start a focus session in seconds with classical, lo-fi, or Gregorian playlists.',
+    heroTitle: 'Free Pomodoro Timer with Music',
+    heroDescription: 'Start a 25-minute focus session, take a short break, or customize your timer. Choose lo-fi, classical, Gregorian music or silence.',
     // Settings
     alarm: 'Alarm',
     volume: 'Volume',
@@ -139,5 +139,11 @@ export const enMessages = {
     lofiDescription: 'Lo-fi uses subtle sonic imperfections and a steady atmosphere that can soften distracting background noise and make deep work easier.',
     classicalDescription: 'Instrumental classical music is often used for study because it avoids lyrical distraction and supports a more stable cognitive rhythm.',
     gregorianDescription: 'Gregorian chant offers a repetitive and contemplative texture that can help some users stay calm and focused during longer sessions.',
+    seoHowTitle: 'How does the Pomodoro timer work?',
+    seoHowDescription: 'Start a 25-minute focus interval, then take a five-minute break. You can choose a quick 15-minute session or adjust focus and break durations in Settings. Use the timer for studying, writing, programming or any task that benefits from uninterrupted time.',
+    seoMusicTitle: 'Choose music that suits your focus',
+    seoMusicDescription: 'Listen to lo-fi, classical or Gregorian playlists while the timer runs, or work in silence. YouTube audio is only loaded after you allow the external player.',
+    seoPrivacyTitle: 'No account needed',
+    seoPrivacyDescription: 'Your timer preferences, tasks and session history stay in this browser. Focus Beat does not require an account or sync this information to a cloud service.',
     footerCopyright: 'Focus Beat'
   } as const;

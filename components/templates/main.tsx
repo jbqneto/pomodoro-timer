@@ -7,15 +7,16 @@ import { Analytics } from "@vercel/analytics/next";
 import Header from "../Header";
 import Footer from "../Footer";
 import { ReactNode } from "react";
+import type { Language } from "@/i18n/types";
 
 
-export default function MainTemplate({ children }: { children: ReactNode }) {
+export default function MainTemplate({ children, initialLanguage = 'en' }: { children: ReactNode; initialLanguage?: Language }) {
   return (
         <ThemeProvider>
-      <LanguageProvider>
+      <LanguageProvider initialLanguage={initialLanguage}>
         <ConfigProvider>
           <div className="flex min-h-screen flex-col bg-neutral-950 text-neutral-100">
-            <Header />
+            <Header page="about" />
             <main className="flex-1">
               <section className="mx-auto mt-6 max-w-3xl space-y-6 px-4">
                 {children}
