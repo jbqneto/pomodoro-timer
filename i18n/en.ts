@@ -43,12 +43,14 @@ export const enMessages = {
     
     // Playlist
     lofi: 'Lo-fi',
+    afterhours: 'After Hours',
     classical: 'Classical',
     silence: 'Silence',
     gregorian: 'Gregorian Chants',
     catholic: 'Gregorian Chants',
     musicCategory: 'Music category',
     musicSessionLabel: 'Music for your session',
+    afterhoursSubtitle: 'Modern late-night vibes for evening focus',
     lofiSubtitle: 'Soft beats for steady deep work',
     classicalSubtitle: 'Instrumental focus with a calmer pace',
     catholicSubtitle: 'Contemplative chants for longer sessions',

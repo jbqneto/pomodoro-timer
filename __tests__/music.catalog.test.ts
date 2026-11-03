@@ -3,12 +3,13 @@ import { getMusicOptions, getMusicSource } from '@/core/music/music.catalog';
 import { parseYouTubeUrl } from '@/core/music/youtube-url';
 
 describe('official music catalog', () => {
-  it('contains each official option', () => expect(getMusicOptions().map(({ id }) => id)).toEqual(['silence', 'gregorian', 'classical', 'lofi']));
+  it('contains each official option', () => expect(getMusicOptions().map(({ id }) => id)).toEqual(['silence', 'gregorian', 'classical', 'lofi', 'afterhours']));
   it('maps silence without a YouTube source', () => expect(getMusicSource('silence')).toEqual({ type: 'silence' }));
   it('preserves official playlist IDs', () => {
     expect(getMusicSource('gregorian')).toEqual({ type: 'youtube-playlist', playlistId: 'PLgRDBI6ZEX_zsw_JKMy_lEyXvvNENoEyr' });
     expect(getMusicSource('classical')).toEqual({ type: 'youtube-playlist', playlistId: 'PLgRDBI6ZEX_ztab0cICj_wIqo1GHjtzDd' });
     expect(getMusicSource('lofi')).toEqual({ type: 'youtube-playlist', playlistId: 'PLgRDBI6ZEX_yqpTYSAgshj_vjoaMs0GP8' });
+    expect(getMusicSource('afterhours')).toEqual({ type: 'youtube-playlist', playlistId: 'PLGMEr1MK-Khc' });
   });
   it('parses custom YouTube videos and playlists', () => {
     expect(parseYouTubeUrl('https://www.youtube.com/watch?v=2ojMshIhLmw')).toEqual({ type: 'youtube-video', videoId: '2ojMshIhLmw' });
