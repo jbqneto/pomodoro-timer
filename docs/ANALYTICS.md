@@ -1,43 +1,24 @@
-# Anonymous product analytics — Umami
+# Umami analytics: only six product signals
 
-The website loads the self-hosted Umami tracker in production and records pageviews automatically. Custom events use the same website ID and the existing typed `ProductAnalytics` port, routed to `UmamiProductAnalytics`. No additional environment variable is required. The tracking adapter only sends from `focus.thedevlab.site`; `next/script` notifies the adapter when ready so early events can be delivered. The former Vercel custom-events feature flag is no longer used. The Vercel pageview integration is otherwise unchanged.
+Umami pageviews remain enabled separately. These are the only **custom** events intentionally emitted:
 
-## Event catalogue
-
-| Event | Trigger | Properties |
+| Question | Event name | Trigger |
 | --- | --- | --- |
-| `app_opened` | Config loaded once on page mount | `interface_mode`, `music_category`, `config_state` (new/saved config, not a unique user) |
-| `interface_mode_changed` | Simple ↔ Advanced actually changed | `from`, `to` |
-| `music_category_selected` | Music selector changed | `music_category`, `interface_mode` |
-| `music_playback_started` | YouTube player reports PLAYING, after a non-playing state | `music_category`, `interface_mode` |
-| `Play - Instrumental Jazz` / `Play - Classical` / `Play - Gregorian Chants` / `Play - Lo-fi` / `Play - Custom Music` | Click Play with the corresponding music selected (intent only) | `control=play`, `music_category`, `interface_mode` |
-| `music_control_used` | Click Pause/Previous/Next | `control`, `music_category`, `interface_mode` |
-| `preset_selected` | Preset changed (Classic, Quick, Custom) | `preset_category`, `interface_mode` |
-| `focus_started`, `focus_completed`, `focus_abandoned` | Actual focus cycle transition | `preset_category`, `duration_bucket`, `music_category`, `interface_mode` |
-| `break_started`, `break_completed`, `break_abandoned` | Actual break cycle transition | same cycle properties |
-| `timer_paused`, `timer_resumed` | Active phase paused or resumed | `phase`, `interface_mode` |
-| `setting_changed` | Toggle auto-play, alarm, break tips, feedback prompts | `setting`, `enabled`, `interface_mode` |
-| `feature_used` | Feature used, e.g. settings/history/task/day completion/custom music | `feature`, `interface_mode` |
-| `returning_focus_completed` | First focus completion on a later local day | `gap_bucket`, `interface_mode` |
-| `usefulness_feedback_submitted` | User responds to usefulness question | `response`, `interface_mode` |
+| Which playlists are selected for manual playback? | `Play - Instrumental Jazz`, `Play - Classical`, `Play - Gregorian Chants`, `Play - Lo-fi`, `Play - Custom Music` | Click Play while that category is selected |
+| Simple vs Advanced usage? | `Mode - Simple`, `Mode - Advanced` | Once upon config load on a page opening and on an actual change of mode |
+| Is the side panel used? | `History Opened` | Sidebar opens |
+| Is the task field used? | `Task Used` | First non-empty task edit per open page |
+| Which timer preset is used? | `Timer - Classic`, `Timer - Quick`, `Timer - Custom` | Focus session **starts**, including default Classic |
+| Is End Day used? | `End Day` | Confirm End Day |
 
-Enumerations: music categories are `silence`, `gregorian`, `classical`, `lofi`, `afterhours`, `custom`; modes `simple`, `advanced`; presets `classic`, `quick`, `custom`; duration buckets `up_to_15`, `16_to_30`, `31_to_50`, `over_50`; return gap buckets `next_day`, `2_to_7_days`, `8_plus_days`.
+All events use a small predefined property set (music/preset/mode). No personal text, task details, YouTube IDs/URLs, session IDs or timestamps are sent.
 
-Feature values: `settings_opened`, `history_opened`, `history_cleared`, `task_saved`, `task_edited`, `end_day`, `daily_note_saved`, `custom_music_added`.
+**Interpretation:** Play events represent **manual clicks**, not confirmed listening; automatic music playback is not counted. Thus these are *manual Play rankings*, not total listening rankings. The mode events count page openings and mode switches, not unique users. Timer events count actual focus starts, not simple clicks on the presets.
 
-**Interpretation:** the named `Play - ...` events represent clicks on Play, not confirmed listening; autoplay is not counted as a manual Play click. The separate `music_playback_started` event represents the YouTube player's confirmed PLAYING state, including autoplay. Do not sum both event types as separate listeners. Selecting a music category does not mean audio was heard. `music_playback_started` reflects the YouTube player's PLAYING state, not unique listeners or listening duration. `focus_started` and `focus_completed` allow a cohort funnel but event-count ratios are not user conversion rates. `app_opened` identifies current stored mode at entry; it does not identify a person. Focus event `music_category` is the category *selected* for that focus, even if the YouTube player was blocked or muted.
+Previous events will remain in historical Umami reports; new deployments stop emitting pause/resume, focus/break, music selection, music confirmation, feedback, settings and miscellaneous feature events.
 
-## Privacy and operational constraints
+The tracker is production-host-only (`focus.thedevlab.site`) and buffers up to 30 early interactions until the script loads. A blocked script must never break the app.
 
-Never record task/daily-note text, local history, YouTube video or playlist identifiers/URLs, session IDs, full timestamps, exact custom durations, client-generated identifiers, email, IP addresses, or arbitrary free text. Only the typed, low-cardinality event properties above may be sent. Do not track every slider movement, timer tick, or pageview manually. Umami's own pageviews are automatic.
+## Validation
 
-No event requests are emitted for localhost or preview domains; if the tracker is blocked, the site must keep working. A bounded in-memory buffer (30 events) handles interactions before the tracking script is ready; it is not persisted across page exits.
-
-## Validate
-
-1. Run `npm run test:run` and `npm run build`.
-2. Deploy the production site.
-3. In browser DevTools > Network, check the Umami script and POST event requests from `focus.thedevlab.site`. Adblockers can block them.
-4. Open Umami > Events > Properties and verify mode, category and feature values.
-5. Select a playlist without playing it: expect `music_category_selected` only. Click Play with Instrumental Jazz selected: expect `Play - Instrumental Jazz` with `control=play`, `music_category=afterhours` and the current `interface_mode`. If YouTube starts, also expect `music_playback_started`.
-6. Verify no task text, custom YouTube URLs, or personal notes appear in event data; check production and preview hosts separately.
+Run `npm run test:run`, `npm run build`, and `node scripts/verify-seo.mjs`. On production, verify these six event families in Umami and check that no other new custom events arrive. Note that the old events remain historically visible.

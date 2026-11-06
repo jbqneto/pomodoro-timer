@@ -12,8 +12,7 @@ declare global {
 const PRODUCTION_HOST = 'focus.thedevlab.site';
 const MAX_PENDING_EVENTS = 30;
 
-// Friendly event names are derived exclusively from the predefined music categories.
-// A Play click expresses intent; confirmed playback remains a separate event.
+// Human-readable labels come only from predefined, anonymous categories.
 const PLAY_INTENT_LABELS: Record<MusicOptionId, string> = {
   silence: 'Silence',
   gregorian: 'Gregorian Chants',
@@ -24,10 +23,17 @@ const PLAY_INTENT_LABELS: Record<MusicOptionId, string> = {
 };
 
 export function getUmamiEventName(event: ProductEvent): string {
-  if (event.name === 'music_control_used' && event.properties.control === 'play') {
-    return `Play - ${PLAY_INTENT_LABELS[event.properties.music_category]}`;
+  switch (event.name) {
+    case 'music_play_clicked': return `Play - ${PLAY_INTENT_LABELS[event.properties.music_category]}`;
+    case 'mode_used': return `Mode - ${event.properties.interface_mode === 'simple' ? 'Simple' : 'Advanced'}`;
+    case 'history_opened': return 'History Opened';
+    case 'task_used': return 'Task Used';
+    case 'timer_preset_used': {
+      const labels = { classic: 'Classic', quick: 'Quick', custom: 'Custom' } as const;
+      return `Timer - ${labels[event.properties.preset_category]}`;
+    }
+    case 'end_day_used': return 'End Day';
   }
-  return event.name;
 }
 const pendingEvents: ProductEvent[] = [];
 
