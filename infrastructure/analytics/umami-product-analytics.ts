@@ -1,4 +1,5 @@
 import { ProductAnalytics, ProductEvent } from '@/application/ports/product-analytics';
+import { MusicOptionId } from '@/core/music/music.types';
 
 declare global {
   interface Window {
@@ -10,6 +11,24 @@ declare global {
 
 const PRODUCTION_HOST = 'focus.thedevlab.site';
 const MAX_PENDING_EVENTS = 30;
+
+// Friendly event names are derived exclusively from the predefined music categories.
+// A Play click expresses intent; confirmed playback remains a separate event.
+const PLAY_INTENT_LABELS: Record<MusicOptionId, string> = {
+  silence: 'Silence',
+  gregorian: 'Gregorian Chants',
+  classical: 'Classical',
+  lofi: 'Lo-fi',
+  afterhours: 'Instrumental Jazz',
+  custom: 'Custom Music',
+};
+
+export function getUmamiEventName(event: ProductEvent): string {
+  if (event.name === 'music_control_used' && event.properties.control === 'play') {
+    return `Play - ${PLAY_INTENT_LABELS[event.properties.music_category]}`;
+  }
+  return event.name;
+}
 const pendingEvents: ProductEvent[] = [];
 
 function canTrack(): boolean {
@@ -18,7 +37,7 @@ function canTrack(): boolean {
 
 function send(event: ProductEvent): void {
   try {
-    const request = window.umami?.track(event.name, event.properties);
+    const request = window.umami?.track(getUmamiEventName(event), event.properties);
     if (request && typeof request.catch === 'function') {
       void request.catch(() => { /* Analytics must never affect the app. */ });
     }
