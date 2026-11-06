@@ -37,7 +37,8 @@ describe('minimal Umami product events', () => {
     const track = vi.fn();
     vi.stubGlobal('window', { location: { hostname: 'focus.thedevlab.site' }, umami: { track } });
     new UmamiProductAnalytics().track(modeEvent);
-    expect(track).toHaveBeenCalledExactlyOnceWith('Mode - Simple', { interface_mode: 'simple' });
+    expect(track).toHaveBeenCalledTimes(1);
+    expect(track).toHaveBeenCalledWith('Mode - Simple', { interface_mode: 'simple' });
   });
 
   it('never tracks on localhost or preview domains', () => {
@@ -55,7 +56,8 @@ describe('minimal Umami product events', () => {
     vi.stubGlobal('window', { location: { hostname: 'focus.thedevlab.site' }, umami: { track } });
     flushPendingUmamiEvents();
     flushPendingUmamiEvents();
-    expect(track).toHaveBeenCalledExactlyOnceWith('Mode - Simple', { interface_mode: 'simple' });
+    expect(track).toHaveBeenCalledTimes(1);
+    expect(track).toHaveBeenCalledWith('Mode - Simple', { interface_mode: 'simple' });
   });
 
   it('does not break app behavior when tracking throws', () => {
