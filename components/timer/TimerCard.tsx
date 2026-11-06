@@ -11,11 +11,8 @@ import { useFeedback } from '@/context/FeedbackContext';
 import { UsefulnessFeedback } from './UsefulnessFeedback';
 import { NextDayNoteModal } from './NextDayNoteModal';
 import { useState, useEffect } from 'react';
-import { ProductAnalytics } from '@/application/ports/product-analytics';
-import { NoopProductAnalytics } from '@/infrastructure/analytics/noop-product-analytics';
-const fallbackAnalytics = new NoopProductAnalytics();
 
-export default function TimerCard({analytics=fallbackAnalytics}:{analytics?:ProductAnalytics}) {
+export default function TimerCard() {
   const { phase, session, showNextDayNote, dismissNextDayNote } = useTimer();
   const { showBreakTips, interfaceMode } = useConfig();
   const isFocus = phase === "focus";
@@ -61,7 +58,7 @@ export default function TimerCard({analytics=fallbackAnalytics}:{analytics?:Prod
             </div>
 
             <div className="mx-auto mt-auto w-full max-w-md pt-4">
-              {!isFocus && feedback.visible ? <UsefulnessFeedback analytics={analytics} /> : !isFocus && showBreakTips ? <BreakTip sessionNumber={session} /> : <TaskInput />}
+              {!isFocus && feedback.visible ? <UsefulnessFeedback /> : !isFocus && showBreakTips ? <BreakTip sessionNumber={session} /> : <TaskInput />}
               <div className="mt-3">
                 <Controls />
               </div>
