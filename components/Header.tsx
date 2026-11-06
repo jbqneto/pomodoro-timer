@@ -6,6 +6,7 @@ import SettingsDialog from "./settings/SettingsDialog";
 import Link from "next/link";
 import { History } from "lucide-react";
 import { useConfig } from "@/context/ConfigContext";
+import { useProductAnalytics } from '@/context/AnalyticsContext';
 
 type HeaderProps = {
   onOpenHistory?: () => void;
@@ -15,6 +16,7 @@ type HeaderProps = {
 export default function Header({ onOpenHistory, page = 'home' }: HeaderProps) {
   const { t,language } = useLanguage();
   const { interfaceMode, isFirstVisit } = useConfig();
+  const analytics = useProductAnalytics();
   const showHistory = interfaceMode !== 'simple';
   const homeHref = language === 'pt' ? '/pt' : '/';
   const aboutHref = language === 'pt' ? '/pt/about' : '/about';
@@ -30,6 +32,7 @@ export default function Header({ onOpenHistory, page = 'home' }: HeaderProps) {
 
   const openSettings = (event: React.MouseEvent<HTMLButtonElement>) => {
     settingsOpener.current = event.currentTarget;
+    analytics.track({ name: 'feature_used', properties: { feature: 'settings_opened', interface_mode: interfaceMode } });
     setOpen(true);
   };
 
