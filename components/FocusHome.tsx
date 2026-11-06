@@ -22,7 +22,7 @@ function HomeContent() {
   const { interfaceMode } = useConfig();
   const analytics = useProductAnalytics();
   const changeHistoryOpen = (open: boolean) => {
-    if (open && !historyOpen) analytics.track({ name: 'feature_used', properties: { feature: 'history_opened', interface_mode: interfaceMode } });
+    if (open && !historyOpen) analytics.track({ name: 'history_opened', properties: { interface_mode: interfaceMode } });
     setHistoryOpen(open);
   };
   const showHistory = interfaceMode !== 'simple';
@@ -43,7 +43,7 @@ function HomeContent() {
               <p className="mt-3 max-w-3xl text-base leading-7 text-neutral-300">{t('heroDescription')}</p>
             </section>
 
-            <TimerCard analytics={services.analytics} />
+            <TimerCard />
             <HomeSeoContent />
           </section>
         </main>
