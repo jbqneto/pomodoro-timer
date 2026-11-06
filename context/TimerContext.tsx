@@ -65,7 +65,11 @@ export function TimerProvider({ children, storage = defaultTimerStorage, clock =
     if (pendingNoteRef.current) { setNextDayNote(pendingNoteRef.current.note); setShowNextDayNote(true); }
     if (state === 'idle') {
       startedAtRef.current = now;
-      if (phase === 'focus') { try { analytics.track({name:'focus_started',properties:toFocusEventProperties(preset,customPreset,activePlaylist,interfaceMode)}); } catch {} }
+      try {
+        analytics.track({ name: phase === 'focus' ? 'focus_started' : 'break_started', properties: toFocusEventProperties(preset, customPreset, activePlaylist, interfaceMode) });
+      } catch {}
+    } else if (state === 'paused') {
+      try { analytics.track({ name: 'timer_resumed', properties: { phase, interface_mode: interfaceMode } }); } catch {}
     }
     const endAt = now + secondsRef.current * 1000;
     endAtRef.current = endAt;
@@ -75,10 +79,15 @@ export function TimerProvider({ children, storage = defaultTimerStorage, clock =
   }, [activePlaylist, analytics, clock, customPreset, interfaceMode, phase, preset, state, dayStarted]);
   const pauseTimer = useCallback(() => {
     if (endAtRef.current !== null) { const remaining = calculateRemainingSeconds(endAtRef.current, clock.now()); secondsRef.current = remaining; setSeconds(remaining); }
+    if (state === 'running') {
+      try { analytics.track({ name: 'timer_paused', properties: { phase, interface_mode: interfaceMode } }); } catch {}
+    }
     clearTick(); setState('paused');
-  }, [clearTick, clock]);
+  }, [analytics, clearTick, clock, interfaceMode, phase, state]);
   const stopTimer = useCallback(() => {
-    if (phase === 'focus' && state !== 'idle') { try { analytics.track({name:'focus_abandoned',properties:toFocusEventProperties(preset,customPreset,activePlaylist,interfaceMode)}); } catch {} }
+    if (state !== 'idle') {
+      try { analytics.track({ name: phase === 'focus' ? 'focus_abandoned' : 'break_abandoned', properties: toFocusEventProperties(preset, customPreset, activePlaylist, interfaceMode) }); } catch {}
+    }
     clearTick();
     startedAtRef.current = null;
     const reset = abandonCycle({ preset, customPreset });
@@ -86,16 +95,26 @@ export function TimerProvider({ children, storage = defaultTimerStorage, clock =
     setState(reset.status); setPhase(reset.phase); setSession(reset.session); setSeconds(secondsRef.current);
   }, [activePlaylist, analytics, clearTick, customPreset, interfaceMode, phase, preset, state]);
   const setPreset = useCallback((value: TimerPreset) => {
+    if (state === 'idle' && preset !== value) {
+      try { analytics.track({ name: 'preset_selected', properties: { preset_category: value === '25/5' ? 'classic' : value === '15' ? 'quick' : 'custom', interface_mode: interfaceMode } }); } catch {}
+    }
     setPresetState(value);
     if (state === 'idle') { secondsRef.current = getPresetSettings(value, customPreset).focus * 60; setPhase('focus'); setSeconds(secondsRef.current); }
-  }, [customPreset, state]);
+  }, [analytics, customPreset, interfaceMode, preset, state]);
   const setCustomPreset = useCallback((value: PresetSettings) => {
     if (!isValidPresetSettings(value)) return;
+    if (state === 'idle' && preset !== 'custom') {
+      try { analytics.track({ name: 'preset_selected', properties: { preset_category: 'custom', interface_mode: interfaceMode } }); } catch {}
+    }
     setCustomPresetState(value);
     if (state === 'idle') { secondsRef.current = value.focus * 60; setPresetState('custom'); setPhase('focus'); setSeconds(secondsRef.current); }
-  }, [state]);
+  }, [analytics, interfaceMode, preset, state]);
 
   const endDay = useCallback((note: string) => {
+    try {
+      analytics.track({ name: 'feature_used', properties: { feature: 'end_day', interface_mode: interfaceMode } });
+      if (note.trim()) analytics.track({ name: 'feature_used', properties: { feature: 'daily_note_saved', interface_mode: interfaceMode } });
+    } catch {}
     const today = getLocalDateKey(new Date(clock.now()));
     if (note.trim()) storage.saveDailyNote(today, note.trim());
     clearTick();
@@ -105,7 +124,7 @@ export function TimerProvider({ children, storage = defaultTimerStorage, clock =
     setState(reset.status); setPhase(reset.phase); setSession(reset.session); setSeconds(secondsRef.current);
     setShowNextDayNote(false);
     setNextDayNote(null);
-  }, [clearTick, clock, customPreset, preset, state, storage]);
+  }, [analytics, clearTick, clock, customPreset, interfaceMode, preset, state, storage]);
 
   const dismissNextDayNote = useCallback(() => {
     setShowNextDayNote(false);
@@ -146,7 +165,12 @@ export function TimerProvider({ children, storage = defaultTimerStorage, clock =
     startedAtRef.current = null;
     const date = getLocalDateKey(completedAt);
     setHistory((current) => ({ date, sessions: [entry, ...(current.date === date ? current.sessions : [])].slice(0, MAX_HISTORY_ENTRIES) }));
-    if (phase === 'focus') { try { analytics.track({name:'focus_completed',properties:toFocusEventProperties(preset,customPreset,activePlaylist,interfaceMode)}); } catch {} onFocusCompleted?.(); }
+    if (phase === 'focus') {
+      try { analytics.track({ name: 'focus_completed', properties: toFocusEventProperties(preset, customPreset, activePlaylist, interfaceMode) }); } catch {}
+      onFocusCompleted?.();
+    } else {
+      try { analytics.track({ name: 'break_completed', properties: toFocusEventProperties(preset, customPreset, activePlaylist, interfaceMode) }); } catch {}
+    }
     const next = getNextTimerTransition({ phase, session, preset, customPreset });
     secondsRef.current = next.durationMinutes * 60;
     setPhase(next.phase); setSession(next.session); setSeconds(secondsRef.current);
@@ -167,7 +191,18 @@ export function TimerProvider({ children, storage = defaultTimerStorage, clock =
     startTimer, pauseTimer, resumeTimer: startTimer,
     stopTimer, endDay, dismissNextDayNote,
     setPreset, setCustomPreset, setTask: (value) => setTaskState(value.slice(0, MAX_TASK_LENGTH)),
-    setTaskLocked: setTaskLockedState, clearSessionHistory: () => setHistory((current) => ({ ...current, sessions: [] })),
+    setTaskLocked: (value) => {
+      if (value !== isTaskLocked && task.trim()) {
+        try { analytics.track({ name: 'feature_used', properties: { feature: value ? 'task_saved' : 'task_edited', interface_mode: interfaceMode } }); } catch {}
+      }
+      setTaskLockedState(value);
+    },
+    clearSessionHistory: () => {
+      if (history.sessions.length) {
+        try { analytics.track({ name: 'feature_used', properties: { feature: 'history_cleared', interface_mode: interfaceMode } }); } catch {}
+      }
+      setHistory((current) => ({ ...current, sessions: [] }));
+    },
   }}>{children}<audio ref={alarmRef} src="/sounds/alarm-clock.mp3" preload="auto" playsInline className="hidden" /></TimerContext.Provider>;
 }
 export function useTimer() {

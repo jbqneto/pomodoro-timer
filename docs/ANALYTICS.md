@@ -1,16 +1,42 @@
-# Anonymous product analytics
+# Anonymous product analytics — Umami
 
-Custom events are disabled by default. Set `NEXT_PUBLIC_PRODUCT_ANALYTICS_ENABLED=true` in production to select the failure-safe Vercel adapter; every other configuration uses the Noop adapter. This flag does not affect the application. Vercel's normal page-view component remains mounted independently. Custom-event availability depends on the deployed Vercel project's configuration and plan.
+The website loads the self-hosted Umami tracker in production and records pageviews automatically. Custom events use the same website ID and the existing typed `ProductAnalytics` port, routed to `UmamiProductAnalytics`. No additional environment variable is required. The tracking adapter only sends from `focus.thedevlab.site`; `next/script` notifies the adapter when ready so early events can be delivered. The former Vercel custom-events feature flag is no longer used. The Vercel pageview integration is otherwise unchanged.
 
-| Event | Trigger | Allowed properties |
+## Event catalogue
+
+| Event | Trigger | Properties |
 | --- | --- | --- |
-| `focus_started` | A focus starts from idle (not resume or break) | `preset_category`, `duration_bucket`, `music_category`, `interface_mode` |
-| `focus_completed` | A focus naturally reaches zero | same focus properties |
-| `focus_abandoned` | An active or paused focus is stopped | same focus properties |
-| `interface_mode_changed` | The user actually changes modes | `from`, `to` |
-| `returning_focus_completed` | First completion on a later local date | `gap_bucket`, `interface_mode` |
-| `usefulness_feedback_submitted` | A feedback answer is selected | `response`, `interface_mode` |
+| `app_opened` | Config loaded once on page mount | `interface_mode`, `music_category`, `config_state` (new/saved config, not a unique user) |
+| `interface_mode_changed` | Simple ↔ Advanced actually changed | `from`, `to` |
+| `music_category_selected` | Music selector changed | `music_category`, `interface_mode` |
+| `music_playback_started` | YouTube player reports PLAYING, after a non-playing state | `music_category`, `interface_mode` |
+| `music_control_used` | Click Play/Pause/Previous/Next | `control`, `music_category`, `interface_mode` |
+| `preset_selected` | Preset changed (Classic, Quick, Custom) | `preset_category`, `interface_mode` |
+| `focus_started`, `focus_completed`, `focus_abandoned` | Actual focus cycle transition | `preset_category`, `duration_bucket`, `music_category`, `interface_mode` |
+| `break_started`, `break_completed`, `break_abandoned` | Actual break cycle transition | same cycle properties |
+| `timer_paused`, `timer_resumed` | Active phase paused or resumed | `phase`, `interface_mode` |
+| `setting_changed` | Toggle auto-play, alarm, break tips, feedback prompts | `setting`, `enabled`, `interface_mode` |
+| `feature_used` | Feature used, e.g. settings/history/task/day completion/custom music | `feature`, `interface_mode` |
+| `returning_focus_completed` | First focus completion on a later local day | `gap_bucket`, `interface_mode` |
+| `usefulness_feedback_submitted` | User responds to usefulness question | `response`, `interface_mode` |
 
-Preset categories are `classic`, `quick`, and `custom`; duration buckets are `up_to_15`, `16_to_30`, `31_to_50`, and `over_50`; music categories are `silence`, `gregorian`, `classical`, `lofi`, `afterhours`, and `custom`. Return gaps are `next_day`, `2_to_7_days`, or `8_plus_days`; feedback responses are `yes`, `partly`, or `no`.
+Enumerations: music categories are `silence`, `gregorian`, `classical`, `lofi`, `afterhours`, `custom`; modes `simple`, `advanced`; presets `classic`, `quick`, `custom`; duration buckets `up_to_15`, `16_to_30`, `31_to_50`, `over_50`; return gap buckets `next_day`, `2_to_7_days`, `8_plus_days`.
 
-Events must never contain task or note text, history, session IDs, timestamps or dates, exact custom durations, identifiers, email or IP addresses, user-data URLs, raw localStorage, or free text.
+Feature values: `settings_opened`, `history_opened`, `history_cleared`, `task_saved`, `task_edited`, `end_day`, `daily_note_saved`, `custom_music_added`.
+
+**Interpretation:** selecting a music category does not mean audio was heard. `music_playback_started` reflects the YouTube player's PLAYING state, not unique listeners or listening duration. `focus_started` and `focus_completed` allow a cohort funnel but event-count ratios are not user conversion rates. `app_opened` identifies current stored mode at entry; it does not identify a person. Focus event `music_category` is the category *selected* for that focus, even if the YouTube player was blocked or muted.
+
+## Privacy and operational constraints
+
+Never record task/daily-note text, local history, YouTube video or playlist identifiers/URLs, session IDs, full timestamps, exact custom durations, client-generated identifiers, email, IP addresses, or arbitrary free text. Only the typed, low-cardinality event properties above may be sent. Do not track every slider movement, timer tick, or pageview manually. Umami's own pageviews are automatic.
+
+No event requests are emitted for localhost or preview domains; if the tracker is blocked, the site must keep working. A bounded in-memory buffer (30 events) handles interactions before the tracking script is ready; it is not persisted across page exits.
+
+## Validate
+
+1. Run `npm run test:run` and `npm run build`.
+2. Deploy the production site.
+3. In browser DevTools > Network, check the Umami script and POST event requests from `focus.thedevlab.site`. Adblockers can block them.
+4. Open Umami > Events > Properties and verify mode, category and feature values.
+5. Select a playlist without playing it: expect `music_category_selected` only. Start YouTube playback: expect `music_playback_started`.
+6. Verify no task text, custom YouTube URLs, or personal notes appear in event data; check production and preview hosts separately.

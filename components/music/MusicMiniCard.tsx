@@ -1,10 +1,11 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import YouTubePlayer, { YoutubePlayerRef } from "../YouTubePlayer";
 import { useLanguage } from "@/context/LanguageContext";
 import { useConfig } from "@/context/ConfigContext";
 import { useTimer } from "@/context/TimerContext";
+import { useProductAnalytics } from "@/context/AnalyticsContext";
 import { getMusicOptions, getMusicSource } from "@/core/music/music.catalog";
 import { MusicOptionId, MusicSource } from "@/core/music/music.types";
 import { parseYouTubeUrl } from "@/core/music/youtube-url";
@@ -25,7 +26,18 @@ const MUSIC_SUBTITLES: Record<MusicOptionId, string> = {
 
 export default function MusicMiniCard({ showTrackNavigation = true }: { showTrackNavigation?: boolean }) {
   const { t } = useLanguage();
-  const { activePlaylist, customMusicSource, musicVolume, autoPlay, setActivePlaylist, setCustomMusicSource, setMusicVolume } = useConfig();
+  const { activePlaylist, customMusicSource, musicVolume, autoPlay, interfaceMode, setActivePlaylist, setCustomMusicSource, setMusicVolume } = useConfig();
+  const analytics = useProductAnalytics();
+  const playbackRef = useRef({ playing: false, category: activePlaylist, mode: interfaceMode });
+  playbackRef.current.category = activePlaylist;
+  playbackRef.current.mode = interfaceMode;
+  const handlePlaybackStateChange = useCallback((playing: boolean) => {
+    if (playing && !playbackRef.current.playing) {
+      analytics.track({ name: 'music_playback_started', properties: { music_category: playbackRef.current.category, interface_mode: playbackRef.current.mode } });
+    }
+    playbackRef.current.playing = playing;
+    setIsPlaying(playing);
+  }, [analytics]);
   const { state: timerState } = useTimer();
   const playerRef = useRef<YoutubePlayerRef>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -59,6 +71,7 @@ export default function MusicMiniCard({ showTrackNavigation = true }: { showTrac
       return;
     }
 
+    analytics.track({ name: 'feature_used', properties: { feature: 'custom_music_added', interface_mode: interfaceMode } });
     setCustomMusicSource(source);
     setActivePlaylist('custom');
     setIsPlaying(false);
@@ -85,6 +98,7 @@ export default function MusicMiniCard({ showTrackNavigation = true }: { showTrac
   function togglePlayback() {
     if (!playerRef.current || consent !== "granted") return;
 
+    analytics.track({ name: 'music_control_used', properties: { control: isPlaying ? 'pause' : 'play', music_category: activePlaylist, interface_mode: interfaceMode } });
     if (isPlaying) {
       playerRef.current.pauseVideo();
       setIsPlaying(false);
@@ -97,11 +111,13 @@ export default function MusicMiniCard({ showTrackNavigation = true }: { showTrac
 
   function playPreviousTrack() {
     if (consent !== "granted") return;
+    analytics.track({ name: 'music_control_used', properties: { control: 'previous', music_category: activePlaylist, interface_mode: interfaceMode } });
     playerRef.current?.previousVideo();
   }
 
   function playNextTrack() {
     if (consent !== "granted") return;
+    analytics.track({ name: 'music_control_used', properties: { control: 'next', music_category: activePlaylist, interface_mode: interfaceMode } });
     playerRef.current?.nextVideo();
   }
 
@@ -182,7 +198,7 @@ export default function MusicMiniCard({ showTrackNavigation = true }: { showTrac
             <div className="aspect-video" />
           ) : consent === "granted" ? (
             <YouTubePlayer ref={playerRef} source={selectedSource} volume={musicVolume}
-              shouldPlay={timerState === 'running' && autoPlay} onPlaybackStateChange={setIsPlaying} />
+              shouldPlay={timerState === 'running' && autoPlay} onPlaybackStateChange={handlePlaybackStateChange} />
           ) : (
             <div className="flex aspect-video flex-col items-center justify-center gap-4 px-6 text-center">
               <p className="max-w-xs text-sm leading-6 text-neutral-300">
