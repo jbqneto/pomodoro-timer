@@ -10,7 +10,8 @@ The website loads the self-hosted Umami tracker in production and records pagevi
 | `interface_mode_changed` | Simple ↔ Advanced actually changed | `from`, `to` |
 | `music_category_selected` | Music selector changed | `music_category`, `interface_mode` |
 | `music_playback_started` | YouTube player reports PLAYING, after a non-playing state | `music_category`, `interface_mode` |
-| `music_control_used` | Click Play/Pause/Previous/Next | `control`, `music_category`, `interface_mode` |
+| `Play - Instrumental Jazz` / `Play - Classical` / `Play - Gregorian Chants` / `Play - Lo-fi` / `Play - Custom Music` | Click Play with the corresponding music selected (intent only) | `control=play`, `music_category`, `interface_mode` |
+| `music_control_used` | Click Pause/Previous/Next | `control`, `music_category`, `interface_mode` |
 | `preset_selected` | Preset changed (Classic, Quick, Custom) | `preset_category`, `interface_mode` |
 | `focus_started`, `focus_completed`, `focus_abandoned` | Actual focus cycle transition | `preset_category`, `duration_bucket`, `music_category`, `interface_mode` |
 | `break_started`, `break_completed`, `break_abandoned` | Actual break cycle transition | same cycle properties |
@@ -24,7 +25,7 @@ Enumerations: music categories are `silence`, `gregorian`, `classical`, `lofi`, 
 
 Feature values: `settings_opened`, `history_opened`, `history_cleared`, `task_saved`, `task_edited`, `end_day`, `daily_note_saved`, `custom_music_added`.
 
-**Interpretation:** selecting a music category does not mean audio was heard. `music_playback_started` reflects the YouTube player's PLAYING state, not unique listeners or listening duration. `focus_started` and `focus_completed` allow a cohort funnel but event-count ratios are not user conversion rates. `app_opened` identifies current stored mode at entry; it does not identify a person. Focus event `music_category` is the category *selected* for that focus, even if the YouTube player was blocked or muted.
+**Interpretation:** the named `Play - ...` events represent clicks on Play, not confirmed listening; autoplay is not counted as a manual Play click. The separate `music_playback_started` event represents the YouTube player's confirmed PLAYING state, including autoplay. Do not sum both event types as separate listeners. Selecting a music category does not mean audio was heard. `music_playback_started` reflects the YouTube player's PLAYING state, not unique listeners or listening duration. `focus_started` and `focus_completed` allow a cohort funnel but event-count ratios are not user conversion rates. `app_opened` identifies current stored mode at entry; it does not identify a person. Focus event `music_category` is the category *selected* for that focus, even if the YouTube player was blocked or muted.
 
 ## Privacy and operational constraints
 
@@ -38,5 +39,5 @@ No event requests are emitted for localhost or preview domains; if the tracker i
 2. Deploy the production site.
 3. In browser DevTools > Network, check the Umami script and POST event requests from `focus.thedevlab.site`. Adblockers can block them.
 4. Open Umami > Events > Properties and verify mode, category and feature values.
-5. Select a playlist without playing it: expect `music_category_selected` only. Start YouTube playback: expect `music_playback_started`.
+5. Select a playlist without playing it: expect `music_category_selected` only. Click Play with Instrumental Jazz selected: expect `Play - Instrumental Jazz` with `control=play`, `music_category=afterhours` and the current `interface_mode`. If YouTube starts, also expect `music_playback_started`.
 6. Verify no task text, custom YouTube URLs, or personal notes appear in event data; check production and preview hosts separately.

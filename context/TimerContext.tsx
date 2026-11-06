@@ -28,7 +28,12 @@ interface TimerContextType {
 }
 const TimerContext = createContext<TimerContextType | undefined>(undefined);
 
-export function TimerProvider({ children, storage = defaultTimerStorage, clock = new BrowserClock(), analytics = new NoopProductAnalytics(), onFocusCompleted }: { children: ReactNode; storage?: TimerStorage; clock?: Clock; analytics?: ProductAnalytics; onFocusCompleted?: () => void }) {
+// Stable defaults for standalone TimerProvider usages (including tests).
+// Creating a new clock on each render re-triggered the hydration effect indefinitely.
+const defaultClock = new BrowserClock();
+const defaultAnalytics = new NoopProductAnalytics();
+
+export function TimerProvider({ children, storage = defaultTimerStorage, clock = defaultClock, analytics = defaultAnalytics, onFocusCompleted }: { children: ReactNode; storage?: TimerStorage; clock?: Clock; analytics?: ProductAnalytics; onFocusCompleted?: () => void }) {
   const { soundEnabled, soundVolume, activePlaylist, interfaceMode } = useConfig();
   const [state, setState] = useState<TimerStatus>('idle');
   const [phase, setPhase] = useState<TimerPhase>('focus');
